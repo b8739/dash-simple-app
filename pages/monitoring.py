@@ -9,6 +9,8 @@ from dash_extensions.enrich import Dash, Output, Input, Trigger, ServersideOutpu
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import plotly.express as px
+import time
+import pandas as pd
 
 df = px.data.iris()
 
@@ -16,7 +18,13 @@ sampleCols = ["소화조 온도", "소화조 pH", "교반기 운전값"]
 
 layout = html.Div(
     [
-        dcc.Store(id="monitored_tags"),
+        html.P(id="cacheValue"),
+        dcc.Store(id="monitored_tags", storage_type="session"),
+        dcc.Store(id="store", storage_type="session"),
+        dbc.Button(
+            "query",
+            id="query",
+        ),
         html.H3("공정 변수 모니터링:"),
         dbc.Button("모니터링 변수 업데이트", id="add_btn", n_clicks=0),
         dcc.Dropdown(
@@ -33,12 +41,44 @@ layout = html.Div(
 
 
 @callback(
+    Output("store", "data"),
+    Input("query", "n_clicks"),
+    State("store", "data"),
+    prevent_initial_callbacks=True,
+)
+def query_data(n_clicks, data):
+    if n_clicks is None:
+        raise PreventUpdate
+    print("query data")
+    time.sleep(0.2)
+    data = df.to_json(orient="records")
+    return len(data)
+
+
+@callback(
+    Output("cacheValue", "children"),
+    Input("store", "modified_timestamp"),
+    State("store", "data"),
+)
+def displayCacheValue(ts, data):
+    if ts is None:
+        raise PreventUpdate
+
+    data = data or {}
+
+    return data
+
+
+@callback(
     ServersideOutput("monitored_tags", "data"),
     Input("add_btn", "n_clicks"),
     State("selected_tags", "value"),
+    prevent_initial_callbacks=True,
     memoize=True,
 )
 def addMonitoredVariable(n_clicks, newValue):
+    if not newValue:
+        raise PreventUpdate
     print("addMonitoredVariable: ", newValue)
     return newValue
 

@@ -27,7 +27,7 @@ app = dash.Dash(
     __name__,
     plugins=[dl.plugins.pages],
     external_stylesheets=[dbc.themes.CERULEAN, dbc.icons.BOOTSTRAP],
-    # prevent_initial_callbacks=True,
+    prevent_initial_callbacks=True,
 )
 # COSMO,
 # SUPERHERO
