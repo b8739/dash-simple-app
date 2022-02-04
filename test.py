@@ -13,6 +13,7 @@ import plotly.express as px
 
 dash.register_page(__name__, path="/test")
 
+
 layout = html.Div(
     [
         # when the browser/tab closes.

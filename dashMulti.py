@@ -26,7 +26,10 @@ import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-component
 app = dash.Dash(
     __name__,
     plugins=[dl.plugins.pages],
-    external_stylesheets=[dbc.themes.CERULEAN, dbc.icons.BOOTSTRAP],
+    external_stylesheets=[
+        dbc.themes.MORPH,
+        dbc.icons.BOOTSTRAP,
+    ],  # CERULEAN,MORPH,MATERIA
     prevent_initial_callbacks=True,
 )
 # COSMO,
@@ -89,19 +92,44 @@ mainContents = [
     dbc.Col(
         [
             dbc.NavbarSimple(
-                brand="다수 지점 통합 모니터링 (임시 타이틀)",
+                brand="다수 지점 통합 모니터링",
                 color="primary",
                 dark=True,
                 className="mb-2",
                 style={"marginLeft": "0", "paddingLeft": 15},
-            )
+                children=[
+                    # dcc.Dropdown(
+                    #     # "사이트 (지점) 선택",
+                    #     id="siteDropdown",
+                    #     multi=True,
+                    #     options=[{"label": col, "value": col} for col in ["제주도"]],
+                    # ),
+                    # dbc.DropdownMenu(
+                    #     # dbc.DropdownMenuItem("More pages", header=True),
+                    #     children=[
+                    #         # dbc.DropdownMenuItem(col, href="#") for col in ["제주", "이천"]
+                    #     ],
+                    #     nav=True,
+                    #     in_navbar=True,
+                    #     label="More",
+                    #     style={"marginRight": "100px"},
+                    # ),
+                    dcc.Dropdown(
+                        id="siteDropdown",
+                        multi=True,
+                        options=[{"label": col, "value": col} for col in ["제주", "이천"]],
+                        style={"width": 160, "marginRight": 50},
+                        placeholder="사이트 (지점) 선택",
+                    ),
+                ],
+            ),
         ],
         width=12,
     ),
     # Contents
     dbc.Col(
         dl.plugins.page_container,
-        style={"padding": "50px"},
+        style={"padding": "30px 50px"},
     ),
 ]
 
