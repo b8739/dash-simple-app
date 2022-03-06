@@ -1,63 +1,237 @@
 import dash
 import pandas as pd
 import numpy as np
+import dash_daq as daq
+import plotly.graph_objs as go
 
-# Code from: https://github.com/plotly/dash-labs/tree/main/docs/demos/multi_page_example1
+from collections import OrderedDict
+
 dash.register_page(__name__)
 
-
-from dash import Dash, dcc, html, Input, Output, callback
+from dash import Dash, dcc, html, Input, Output, callback, dash_table
 import plotly.express as px
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
 
 
-# df = px.data.iris()
-# df_species = df.species.unique()
-# df = pd.concat([df + np.random.randn(*df.shape) * 0.1 for i in range(100)])
-predict = [np.random.randint(30, 35) for n in range(100)]
-actual = [np.random.randint(29, 34) for n in range(100)]
-type = ["predict", "actual"] * (100 // 2)
-
-# table
-assessment = ["MSE", "RMSE", "MAE", "MAPE"]
-table_header = [
-    html.Thead(html.Tr([html.Th(n) for n in ["MSE", "RMSE", "MAE", "MAPE"]]))
-]
-
-row1 = html.Tr([html.Td("(number)") for _ in range(4)])
-
-table_body = [html.Tbody([row1])]
-
-table = dbc.Table(table_header + table_body, bordered=True)
+predict = np.random.randn(500)
+actual = np.random.randn(500)
+type = ["SVR Pred.", "RF Pred.", "ENSEMBLE Pred.", "Actual MI"] * (500 // 4)
 
 
-layout = html.Div(
-    [
-        dcc.Dropdown(
-            id="dropdown",
-            options=[{"label": col, "value": col} for col in ["1"]],
-            multi=True,
-            persistence=True,
-            persistence_type="session",
+df = pd.read_csv("ketep_biogas_data_20220210.csv")
+dff = {"key": df.columns[0:8], "val": [v for v in df.iloc[0, [0, 1, 2, 3, 4, 5, 6, 7]]]}
+
+theme = {
+    "dark": True,
+    "detail": "#007439",
+    "primary": "#00EA64",
+    "secondary": "#6E6E6E",
+}
+
+
+def makeBarGraph():
+    fig = px.bar(dff, x="val", y="key", orientation="h", template="plotly_dark")
+    fig.update_traces(
+        marker_color=theme["primary"],
+        # marker_color=theme["primary"],
+        marker_line_color=theme["primary"],
+        marker_line_width=1.5,
+        opacity=0.6,
+    )
+    return fig
+
+
+def makeLineGraph():
+    trace_list = [
+        go.Scatter(
+            name="Actual",
+            y=df["Dig_Feed_A"],
+            visible=True,
+            mode="lines+markers",
+            line={"width": 1},
+            marker=dict(size=5),
         ),
-        dcc.Graph(id="line-chart"),
-        table,
+        go.Scatter(
+            name="Predictive",
+            y=df["Dig_Feed_B"],
+            visible=True,
+            mode="lines+markers",
+            line={"width": 1},
+            marker=dict(size=0.3),
+        ),
+    ]
+
+    fig = go.Figure(data=trace_list)
+    fig.update_layout(
+        title={
+            "text": "예측량 실측량 비교 ",
+            "y": 0.9,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+        }
+    )
+
+    fig.update_layout(template="plotly_dark")
+    return fig
+
+
+algorithm = ["XGBoost", "SVR", "LSTM", "Ensemble"]
+
+
+def makeAlgorithmPrediction():
+    algorithm = ["XGBoost", "SVR", "LSTM", "Ensemble"]
+    prediction = ["3.323", "21.323", "103.323", "5.323"]
+
+    return [
+        dbc.Col(
+            daq.LEDDisplay(
+                id="our-LED-display",
+                label=a,
+                value=prediction[idx],
+                color="#f4d44d",
+                size=32,
+            ),
+        )
+        for idx, a in enumerate(algorithm)
+    ]
+
+
+# Card
+
+card = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H5("88%", className="card-title"),
+            html.H6("MAPE", className="card-subtitle"),
+        ]
+    ),
+    inverse=True,
+    style={
+        "width": "10rem",
+    },
+)
+
+data = OrderedDict(
+    [
+        (
+            "(Simulation Result)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+        (
+            "(Simulation Result2)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+        (
+            "(Simulation Result3)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+        (
+            "(Simulation Result4)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+        (
+            "(Simulation Result5)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
     ]
 )
 
 
-@callback(Output("line-chart", "figure"), Input("dropdown", "value"))
-def update_chart(day):
-    # mask = df.species.isin(df_species)
-    fig = px.line(y=predict, color=type)
-    fig.update_xaxes(rangeslider_visible=True)
-    fig.update_layout(
-        title={
-            "text": "생산량 예측값 비교 Sample (기간: 최근 1주일)",
-            "xref": "paper",
-            "yref": "paper",
-            "x": 0.5,
-            # "y": 0.5,
-        }
-    )
-    return fig
+simulation_df = pd.DataFrame(data)
+# Layout
+
+layout = html.Div(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.Div(
+                        card,
+                        style={
+                            "display": "flex",
+                            "align-items": "center",
+                            "justify-content": "space-around",
+                        },
+                    )
+                )
+                for _ in range(4)
+            ],
+        ),
+        dbc.Row(makeAlgorithmPrediction()),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dcc.Graph(
+                        id="bar_graph",
+                        figure=makeBarGraph(),
+                        style={"height": "30vh", "width": "70vh"},
+                    ),
+                ),
+                dbc.Col(
+                    dcc.Graph(
+                        id="bar_graph",
+                        figure=makeLineGraph(),
+                        style={"height": "30vh", "width": "70vh"},
+                    ),
+                ),
+            ]
+        ),
+        html.Br(),
+        dbc.Row(
+            [
+                dash_table.DataTable(
+                    data=simulation_df.to_dict("records"),
+                    columns=[{"id": c, "name": c} for c in simulation_df.columns],
+                    id="tbl",
+                    style_header={
+                        "backgroundColor": "rgb(30, 30, 30)",
+                        "color": "white",
+                    },
+                    style_cell={"textAlign": "left"},
+                    style_data={
+                        "backgroundColor": "rgb(50, 50, 50)",
+                        "color": "white",
+                        "fontFamily": "Segoe UI",
+                    },
+                ),
+            ]
+        ),
+    ]
+)

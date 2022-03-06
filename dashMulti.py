@@ -9,6 +9,8 @@ from flask import (
     request,
     Response,
 )
+import dash_daq as daq
+
 from dash.dependencies import Input, Output
 import dash
 import dash_core_components as dcc
@@ -23,11 +25,18 @@ import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-component
 
 # Code from: https://github.com/plotly/dash-labs/tree/main/docs/demos/multi_page_example1
 
+theme = {
+    "dark": True,
+    "detail": "#007439",
+    "primary": "#00EA64",
+    "secondary": "#6E6E6E",
+}
+
 app = dash.Dash(
     __name__,
     plugins=[dl.plugins.pages],
     external_stylesheets=[
-        dbc.themes.MORPH,
+        dbc.themes.SLATE,
         dbc.icons.BOOTSTRAP,
     ],  # CERULEAN,MORPH,MATERIA
     prevent_initial_callbacks=True,
@@ -61,29 +70,15 @@ def createNav():
 
 
 SIDEBAR_STYLE = {
-    # "position": "fixed",
-    # "top": 0,
-    # "left": 0,
-    # "bottom": 0,
-    # "width": "16rem",
     "padding": "2rem 0.5rem",
     "height": "100%",
-    # "backgroundColor": "#0B083B",
-    # "backgroundColor": "#f8f9fa",
+    "backgroundColor": "#f1f2f6",
 }
 
 pass
 
 sidebar = dbc.Card(
-    [
-        html.H5("기능"),
-        html.Hr(),
-        dbc.Nav(
-            createNav(),
-            vertical=True,
-            pills=True,
-        ),
-    ],
+    [],
     # color="primary",
     style=SIDEBAR_STYLE,
 )
@@ -92,51 +87,52 @@ mainContents = [
     dbc.Col(
         [
             dbc.NavbarSimple(
-                brand="다수 지점 통합 모니터링",
+                brand="Biogas 플랜트 공정 운전 변수 모니터링 및 이상 감지",
                 color="primary",
                 dark=True,
-                className="mb-2",
-                style={"marginLeft": "0", "paddingLeft": 15},
+                fluid=True,
+                style={
+                    "paddingLeft": 50,
+                    "paddingRight": 50,
+                },
                 children=[
-                    # dcc.Dropdown(
-                    #     # "사이트 (지점) 선택",
-                    #     id="siteDropdown",
-                    #     multi=True,
-                    #     options=[{"label": col, "value": col} for col in ["제주도"]],
-                    # ),
-                    # dbc.DropdownMenu(
-                    #     # dbc.DropdownMenuItem("More pages", header=True),
-                    #     children=[
-                    #         # dbc.DropdownMenuItem(col, href="#") for col in ["제주", "이천"]
-                    #     ],
-                    #     nav=True,
-                    #     in_navbar=True,
-                    #     label="More",
-                    #     style={"marginRight": "100px"},
-                    # ),
+                    dbc.Nav(
+                        [
+                            dbc.NavItem(
+                                dbc.NavLink(
+                                    page["name"], href=page["path"], active="exact"
+                                )
+                            )
+                            for page in dash.page_registry.values()
+                        ]
+                    ),
                     dcc.Dropdown(
                         id="siteDropdown",
                         multi=True,
                         options=[{"label": col, "value": col} for col in ["제주", "이천"]],
-                        style={"width": 160, "marginRight": 50},
+                        style={
+                            "width": 160,
+                            "marginLeft": 25,
+                            # "marginRight": 50,
+                        },
                         placeholder="사이트 (지점) 선택",
                     ),
                 ],
             ),
         ],
-        width=12,
     ),
     # Contents
     dbc.Col(
         dl.plugins.page_container,
-        style={"padding": "30px 50px"},
+        style={"padding": "30px 50px", "backgroundColor": "#303030"},
     ),
 ]
+
 
 final = html.Div(
     [
         dbc.Row(
-            [dbc.Col(sidebar, width=2), dbc.Col(mainContents, width=10)],
+            [dbc.Col(mainContents)],
             className="g-0",
             style={"height": "100vh"},
         )
@@ -145,9 +141,12 @@ final = html.Div(
 
 
 app.layout = dbc.Container(
-    [final],
+    id="dark-theme-components-1",
+    children=[daq.DarkThemeProvider(theme=theme, children=final)],
     fluid=True,
-    style={"padding": "0"},
+    style={
+        "padding": "0",
+    },
 )
 if __name__ == "__main__":
     app.run_server(debug=True)
