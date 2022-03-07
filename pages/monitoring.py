@@ -16,8 +16,13 @@ import dash_daq as daq
 from dash.dependencies import Input, Output, ALL, State, MATCH, ALLSMALLER
 import sys
 
-sys.path.append("./logic")
+from dataset import df
 import prepare_data
+
+# from dashMulti import df
+
+sys.path.append("./logic")
+
 
 theme = {
     "dark": True,
@@ -29,15 +34,6 @@ theme = {
 displayNone = {
     "display": "none",
 }
-# Iris
-# df_01 = px.data.iris()[["sepal_length", "sepal_width", "petal_length", "petal_width"]]
-# df_01 = pd.concat([df_01 + np.random.randn(*df_01.shape) * 0.1 for i in range(1000)])
-
-"""Data Preprocess"""
-df_00 = pd.read_csv("ketep_biogas_data_20220210.csv")
-df_01 = prepare_data.preprocess(df_00)
-df_veri = prepare_data.extract_veri(df_00)
-train_Xn, train_y, test_Xn, test_y, X_test = prepare_data.split_dataset(df_01)
 
 
 """Frontend"""
@@ -87,7 +83,7 @@ def plotMonitoringGraphs():
                             dcc.Dropdown(
                                 id={"type": "tagDropdown", "index": idx},
                                 options=[
-                                    {"label": c, "value": c} for c in df_01.columns
+                                    {"label": c, "value": c} for c in df.columns
                                 ],
                                 placeholder="Select Tag",
                                 value=monitored_tags[idx],
@@ -115,8 +111,8 @@ def plotMonitoringGraphs():
 
 
 def makeBioGraph():
-    tag = df_01.columns[3]
-    fig = px.scatter(df_01, y=tag, title=None, template="plotly_dark")
+    tag = df.columns[3]
+    fig = px.scatter(df, y=tag, title=None, template="plotly_dark")
     fig.update_traces(
         mode="markers", marker=dict(size=1, line=dict(width=2, color="#f4d44d"))
     ),
@@ -178,9 +174,9 @@ biogasProduct = [
             ),
             dbc.Col(
                 dcc.Dropdown(
-                    options=[{"label": c, "value": c} for c in df_01.columns],
+                    options=[{"label": c, "value": c} for c in df.columns],
                     placeholder="Select Tag",
-                    value=df_01.columns[3],
+                    value=df.columns[3],
                     clearable=False,
                     persistence=True,
                     style={
@@ -254,13 +250,13 @@ def changeTag(tag, indicator):
     " " " Plotly Graph 생성 " " "
 
     if not tag:
-        tag = df_01.columns[3]
-    fig = px.scatter(df_01, y=tag, title=None, template="plotly_dark")
+        tag = df.columns[3]
+    fig = px.scatter(df, y=tag, title=None, template="plotly_dark")
     fig.update_traces(
         mode="markers", marker=dict(size=1, line=dict(width=2, color="#f4d44d"))
     ),
     fig.update_yaxes(rangemode="normal")
-    fig.update_yaxes(range=[df_01[tag].min() * (0.8), df_01[tag].max() * (1.2)])
+    fig.update_yaxes(range=[df[tag].min() * (0.8), df[tag].max() * (1.2)])
     # fig.update_xaxes(rangeslider_visible=True)
     fig.update_layout(
         title={
@@ -274,10 +270,10 @@ def changeTag(tag, indicator):
 
     " " " Quantile 표시 " " "
 
-    q_position = df_01[tag].min() * 1.1
+    q_position = df[tag].min() * 1.1
 
     for q in ["Q1", "Q2", "Q3", "Q4"]:
-        q_position += df_01[tag].max() / 4
+        q_position += df[tag].max() / 4
 
         fig.add_hline(
             y=q_position,

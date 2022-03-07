@@ -25,6 +25,11 @@ import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-component
 
 # Code from: https://github.com/plotly/dash-labs/tree/main/docs/demos/multi_page_example1
 
+import sys
+
+sys.path.append("./logic")
+
+
 theme = {
     "dark": True,
     "detail": "#007439",

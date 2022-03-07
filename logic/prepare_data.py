@@ -21,7 +21,7 @@ def preprocess(df_00):
     df_00["date"] = pd.to_datetime(
         df_00["date"]
     )  # Change data type from 'object' to 'datetime'
-    df_01 = df_00.iloc[0:1022, :]  # Train & Test data set
+    df_01 = df_00.iloc[0:1022, :].copy()  # Train & Test data set
 
     df_01.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
     return df_01
@@ -31,7 +31,7 @@ def preprocess(df_00):
 
 
 def extract_veri(df_00):
-    df_veri = df_00.iloc[1022:1029, :]  # Data for Verifying (TTA Test)
+    df_veri = df_00.iloc[1022:1029, :].copy()  # Data for Verifying (TTA Test)
     return df_veri
 
 
