@@ -20,7 +20,7 @@ def MAPE(y, pred):
 
 def create_model(algorithm, train_Xn, train_y):
     model = None
-    if algorithm == "xgboost":
+    if algorithm == "xgb":
         model = xgb.XGBRegressor(
             n_estimators=1800,
             learning_rate=0.01,
@@ -31,7 +31,7 @@ def create_model(algorithm, train_Xn, train_y):
             max_depth=7,
         )
     elif algorithm == "svr":
-        svr_model = SVR(
+        model = SVR(
             kernel="rbf",
             C=100000,
             epsilon=0.9,
@@ -44,38 +44,34 @@ def create_model(algorithm, train_Xn, train_y):
         )
     elif algorithm == "rf":
         model = RandomForestRegressor(n_estimators=400, min_samples_split=3)
-    if model:
+
+    if model is not None:
         model.fit(train_Xn, train_y)
     return model
 
 
-def run_xgboost(xgb_model, test_Xn, test_y):
-    xgb_model_predict = xgb_model.predict(test_Xn)
-
-    # CONFIRM PREDICTION POWER #
-    print("R_square_XGB :", r2_score(test_y, xgb_model_predict))
-    print("RMSE_XGB :", mean_squared_error(test_y, xgb_model_predict) ** 0.5)
-    print("MAPE_XGB :", MAPE(test_y, xgb_model_predict))
-
-    """ Draw performance graph : 'Actual' vs 'Predictive' """
-
-
-""" """ """""" " 2. RANDOM FOREST ALGORITHM  " """""" """ """
-
-
-def run_svr(rf_model, test_Xn, test_y):
-    rf_model_predict = rf_model.predict(test_Xn)
-
-    print("R_square :", r2_score(test_y, rf_model_predict))
-    print("RMSE :", mean_squared_error(test_y, rf_model_predict) ** 0.5)
-    print("MAPE :", MAPE(test_y, rf_model_predict))
+def run(algorithm, model, test_Xn, test_y):
+    model_predict = model.predict(test_Xn)
+    RMSE = mean_squared_error(test_y, model_predict) ** 0.5
+    if algorithm == "xgb" or algorithm == "rf":
+        # CONFIRM PREDICTION POWER #
+        print("R_square_XGB: ", r2_score(test_y, model_predict))
+        print("RMSE: ", RMSE)
+        print("MAPE: ", MAPE(test_y, model_predict))
+    elif algorithm == "svr":
+        print("RMSE: ", RMSE)
+        print("MAPE: ", MAPE(test_y, model_predict))
+    return {"prediction": model_predict, "RMSE": RMSE}
 
 
-""" """ """""" " 3. SVR ALGORITHM  " """""" """ """
-
-
-def run_svr(svr_model, test_Xn, test_y):
-    svr_model_predict = svr_model.predict(test_Xn)
-
-    print("RMSE :", mean_squared_error(test_y, svr_model_predict) ** 0.5)
-    print("MAPE :", MAPE(test_y, svr_model_predict))
+def get_actual_predictive(x1, y_act, y_pred):
+    z0 = pd.DataFrame(x1["date"])
+    z0 = z0.reset_index(drop=True)
+    z1 = pd.DataFrame(y_act)
+    z1 = z1.reset_index(drop=True)
+    z2 = pd.DataFrame(y_pred)
+    result = pd.concat([z0, z1, z2], axis=1)
+    result.columns = ["date", "Actual", "Predictive"]
+    result = result.sort_values(by=["date"], axis=0, ascending=True)
+    result = result.set_index("date")
+    return result

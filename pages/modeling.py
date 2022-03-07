@@ -6,11 +6,20 @@ import plotly.graph_objs as go
 
 from collections import OrderedDict
 
-dash.register_page(__name__)
+# dash.register_page(__name__)
 
 from dash import Dash, dcc, html, Input, Output, callback, dash_table
 import plotly.express as px
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
+
+import sys
+
+sys.path.append("../logic")
+import algorithm
+
+# from dataset import df
+
+# from dataset import result_df
 
 
 predict = np.random.randn(500)
