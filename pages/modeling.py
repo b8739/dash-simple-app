@@ -6,11 +6,32 @@ import plotly.graph_objs as go
 
 from collections import OrderedDict
 
-dash.register_page(__name__)
+# dash.register_page(__name__)
 
 from dash import Dash, dcc, html, Input, Output, callback, dash_table
+from dash.dependencies import Output, ALL, State, MATCH, ALLSMALLER
+
 import plotly.express as px
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
+from dash_extensions.enrich import (
+    DashProxy,
+    Input,
+    Output,
+    TriggerTransform,
+    ServersideOutputTransform,
+    ServersideOutput,
+    Trigger,
+)
+import sys
+
+sys.path.append("../logic")
+
+
+app = DashProxy()
+
+# from dataset import df
+
+# from dataset import result_df
 
 
 predict = np.random.randn(500)
@@ -110,6 +131,7 @@ card = dbc.Card(
     style={
         "width": "10rem",
     },
+    id="card",
 )
 
 data = OrderedDict(
@@ -176,7 +198,7 @@ data = OrderedDict(
 simulation_df = pd.DataFrame(data)
 # Layout
 
-layout = html.Div(
+app.layout = html.Div(
     [
         dbc.Row(
             [
@@ -231,7 +253,28 @@ layout = html.Div(
                         "fontFamily": "Segoe UI",
                     },
                 ),
+                html.Div(id="container", children=[]),
+                html.Button("modeling data tesing", id="btn_4"),
             ]
         ),
     ]
 )
+
+
+@app.callback(
+    Output("container", "children"),
+    Trigger("btn_4", "n_clicks"),
+    State("preprocessed_store", "data"),
+    State("container", "children"),
+    # prevent_initial_call=True,
+)
+def testing(preprocessed_store, container):
+    print(preprocessed_store)
+    return
+    # tab_container.append(tab1_content)
+    # tab_container.append(tab2_content)
+    # return tab_container
+
+
+if __name__ == "__main__":
+    app.run_server()

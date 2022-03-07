@@ -2,10 +2,8 @@ import dash
 
 # Code from: https://github.com/plotly/dash-labs/tree/main/docs/demos/multi_page_example1
 # dash.register_page(__name__, path="/")
-dash.register_page(__name__, path="/monitoring", name="Monitoring", order=2)
 
-from dash import Dash, dcc, html, Input, Output, State, callback
-from dash_extensions.enrich import Dash, Output, Input, Trigger, ServersideOutput
+from dash import Dash, dcc, html, Output, State, callback
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -13,16 +11,27 @@ import time
 import pandas as pd
 import numpy as np
 import dash_daq as daq
-from dash.dependencies import Input, Output, ALL, State, MATCH, ALLSMALLER
+from dash.dependencies import Output, ALL, State, MATCH, ALLSMALLER
 import sys
+from dash_extensions.enrich import Output, Input, Trigger, ServersideOutput
 
-from dataset import df
+# from dataset import df
 import prepare_data
+from dash_extensions.enrich import (
+    DashProxy,
+    Input,
+    Output,
+    TriggerTransform,
+    ServersideOutputTransform,
+    ServersideOutput,
+    Trigger,
+)
 
 # from dashMulti import df
+app = DashProxy()
 
 sys.path.append("./logic")
-
+# print(preprocessed_store)
 
 theme = {
     "dark": True,
@@ -47,7 +56,7 @@ def isNormal(idx):
         return {"state": "Normal", "color": theme["primary"]}
 
 
-def plotMonitoringGraphs():
+def plotMonitoringGraphs(graph_type, graph_number):
     return [
         dbc.Col(
             [
@@ -83,7 +92,7 @@ def plotMonitoringGraphs():
                             dcc.Dropdown(
                                 id={"type": "tagDropdown", "index": idx},
                                 options=[
-                                    {"label": c, "value": c} for c in df.columns
+                                    {"label": c, "value": c} for c in monitored_tags
                                 ],
                                 placeholder="Select Tag",
                                 value=monitored_tags[idx],
@@ -99,18 +108,18 @@ def plotMonitoringGraphs():
                 ),
                 html.Br(),
                 dcc.Graph(
-                    id={"type": "monitoring-graph", "index": idx},
+                    id={"type": graph_type, "index": idx},
                     style={"height": "30vh"},
                 ),
                 html.Br(),
             ],
             width=6,
         )
-        for idx in range(4)
+        for idx in range(graph_number)
     ]
 
 
-def makeBioGraph():
+def makeBioGraph(df):
     tag = df.columns[3]
     fig = px.scatter(df, y=tag, title=None, template="plotly_dark")
     fig.update_traces(
@@ -129,7 +138,56 @@ def makeBioGraph():
     return fig
 
 
+tab1_content = dbc.Tab(
+    dbc.Card(
+        dbc.CardBody([dbc.Row(plotMonitoringGraphs("monitoring-graph", 4))]),
+        className="mt-3",
+    ),
+    label="이상 감지",
+    id="tab-1",
+)
+
+tab2_content = dbc.Tab(
+    dbc.Card(
+        # dbc.CardBody([html.Div(plotMonitoringGraphs('bioGas',1))]),
+        className="mt-3",
+    ),
+    label="성능 감시",
+    id="tab-1",
+)
+tabs = dbc.Tabs(
+    [tab1_content, tab2_content],
+    id="tab_container",
+)
+
+
+app.layout = html.Div(
+    dbc.Row(
+        [
+            dbc.Col(
+                [
+                    dbc.Row(
+                        dbc.Col(
+                            dcc.Loading(
+                                children=[
+                                    # html.Button("monitoring에서 불러오기", id="btn_3"),
+                                    tabs,
+                                ],
+                                type="circle",
+                            ),
+                        )
+                    ),
+                ],
+                width=12,
+            ),
+        ],
+        style={"position": "relative"},
+    ),
+)
+
+
 tabs_styles = {"height": "44px", "align-items": "center"}
+
 tab_style = {
     "fontWeight": "bold",
     "border-radius": "15px",
@@ -147,108 +205,36 @@ tab_selected_style = {
     "padding": "6px",
     "border-radius": "15px",
 }
-biogasProduct = [
-    dbc.Row(
-        [
-            dbc.Col(
-                [
-                    html.Span(
-                        "Normal",
-                        style={
-                            "marginRight": 15,
-                            "textAlign": "center",
-                        },
-                    ),
-                    daq.Indicator(
-                        id="indicator",
-                        color=theme["primary"],
-                        value=True,
-                        className="dark-theme-control",
-                        style={"display": "inline-block"},
-                    ),
-                    dbc.Tooltip(
-                        "정상 작동중입니다.",
-                        target="indicator",
-                    ),
-                ]
-            ),
-            dbc.Col(
-                dcc.Dropdown(
-                    options=[{"label": c, "value": c} for c in df.columns],
-                    placeholder="Select Tag",
-                    value=df.columns[3],
-                    clearable=False,
-                    persistence=True,
-                    style={
-                        "backgroundColor": "rgb(48, 48, 48)",
-                    },
-                ),
-                width=3,
-            ),
-        ]
-    ),
-    dbc.Row(
-        dcc.Graph(
-            id="bioproduct-graph",
-            figure=makeBioGraph(),
-            style={"height": "35vh"},
-        ),
-    ),
-]
-
-tab1_content = dbc.Card(
-    dbc.CardBody([dbc.Row(plotMonitoringGraphs())]),
-    className="mt-3",
-)
-
-tab2_content = dbc.Card(
-    dbc.CardBody([html.Div(biogasProduct)]),
-    className="mt-3",
-)
 
 
-tabs = dbc.Tabs(
-    [
-        dbc.Tab(tab1_content, label="이상 감지", id="tab-1"),
-        dbc.Tab(tab2_content, label="성능 감시", id="tab-2"),
-    ],
-    id="tabs-styled-with-props",
-)
-layout = html.Div(
-    dbc.Row(
-        [
-            dbc.Col(
-                [
-                    dbc.Row(
-                        dbc.Col(
-                            dcc.Loading(
-                                children=[
-                                    tabs,
-                                ],
-                                type="circle",
-                            ),
-                        )
-                    ),
-                ],
-                width=12,
-            ),
-        ],
-        style={"position": "relative"},
-    ),
-)
-#
+# @app.callback(
+#     Output("tab_container", "children"),
+#     Input("btn_3", "n_clicks"),
+#     State("preprocessed_store", "data"),
+#     State("tab_container", "children"),
+#     # prevent_initial_call=True,
+# )
+# def create_layout(btn_3, preprocessed_store, tab_container):
+#     pass
+#     # tab_container.append(tab1_content)
+#     # tab_container.append(tab2_content)
+#     # return tab_container
 
 
-@callback(
+"""Dropdown에서 tag 클릭하면 data update하는 callback"""
+
+
+@app.callback(
     Output({"type": "monitoring-graph", "index": MATCH}, "figure"),
     Input({"type": "tagDropdown", "index": MATCH}, "value"),
     Input({"type": "indicator", "index": MATCH}, "value"),
+    State("preprocessed_store", "data"),
     # prevent_initial_call=True,
-    memoize=True,
+    # memoize=True,
 )
-def changeTag(tag, indicator):
+def changeTag(tag, indicator, df):
     " " " Plotly Graph 생성 " " "
-
+    print("change tag")
     if not tag:
         tag = df.columns[3]
     fig = px.scatter(df, y=tag, title=None, template="plotly_dark")
@@ -312,3 +298,7 @@ def changeTag(tag, indicator):
         )
 
     return fig
+
+
+if __name__ == "__main__":
+    app.run_server()
