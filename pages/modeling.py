@@ -33,6 +33,15 @@ app = DashProxy()
 
 # from dataset import result_df
 
+import sys
+
+sys.path.append("../logic")
+import algorithm
+
+# from dataset import df
+
+# from dataset import result_df
+
 
 predict = np.random.randn(500)
 actual = np.random.randn(500)

@@ -43,7 +43,7 @@ import sys
 import dash_core_components as dcc
 from dash_extensions.multipage import (
     PageCollection,
-    # app_to_page,
+    app_to_page,
     module_to_page,
     Page,
     CONTENT_ID,
@@ -58,18 +58,12 @@ import prepare_data
 import algorithm
 
 
-def app_to_page(app, id, label):
-    app.transforms.append(id)
-    return Page(id=id, label=label, proxy=app)
-
-
 theme = {
     "dark": True,
     "detail": "#007439",
     "primary": "#00EA64",
     "secondary": "#6E6E6E",
 }
-
 
 # Create app.
 app = DashProxy(
@@ -169,7 +163,7 @@ final = html.Div(
         html.Button("Cache 2", id="btn_2"),
         dcc.Loading(
             dcc.Store(
-                id="preprocessed_store",
+                id="app-preprocessed_store",
                 storage_type="session",
             ),
             fullscreen=True,
@@ -190,7 +184,7 @@ train_Xn, train_y, test_Xn, test_y, X_test = 0, 0, 0, 0, 0
 
 
 @app.callback(
-    ServersideOutput("preprocessed_store", "data"),
+    ServersideOutput("app-preprocessed_store", "data"),
     Input("btn_1", "n_clicks"),
     memoize=True,
 )
