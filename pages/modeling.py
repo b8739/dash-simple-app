@@ -6,6 +6,8 @@ import plotly.graph_objs as go
 
 from collections import OrderedDict
 
+dash.register_page(__name__, path="/modeling", name="Modeling", order=2)
+
 # dash.register_page(__name__)
 
 from dash import Dash, dcc, html, Input, Output, callback, dash_table
@@ -25,9 +27,8 @@ from dash_extensions.enrich import (
 import sys
 
 sys.path.append("../logic")
+import prepare_data
 
-
-app = DashProxy()
 
 # from dataset import df
 
@@ -71,60 +72,7 @@ def makeBarGraph():
     return fig
 
 
-def makeLineGraph():
-    trace_list = [
-        go.Scatter(
-            name="Actual",
-            y=df["Dig_Feed_A"],
-            visible=True,
-            mode="lines+markers",
-            line={"width": 1},
-            marker=dict(size=5),
-        ),
-        go.Scatter(
-            name="Predictive",
-            y=df["Dig_Feed_B"],
-            visible=True,
-            mode="lines+markers",
-            line={"width": 1},
-            marker=dict(size=0.3),
-        ),
-    ]
-
-    fig = go.Figure(data=trace_list)
-    fig.update_layout(
-        title={
-            "text": "예측량 실측량 비교 ",
-            "y": 0.9,
-            "x": 0.5,
-            "xanchor": "center",
-            "yanchor": "top",
-        }
-    )
-
-    fig.update_layout(template="plotly_dark")
-    return fig
-
-
-algorithm = ["XGBoost", "SVR", "LSTM", "Ensemble"]
-
-
-def makeAlgorithmPrediction():
-    algorithm = ["XGBoost", "SVR", "LSTM", "Ensemble"]
-    prediction = ["3.323", "21.323", "103.323", "5.323"]
-
-    return [
-        dbc.Col(
-            daq.LEDDisplay(
-                id="our-LED-display",
-                label=a,
-                value=prediction[idx],
-                color="#f4d44d",
-                size=32,
-            ),
-        )
-        for idx, a in enumerate(algorithm)
-    ]
+algorithm_list = ["XGBoost", "SVR", "LSTM", "Ensemble"]
 
 
 # Card
@@ -132,7 +80,7 @@ def makeAlgorithmPrediction():
 card = dbc.Card(
     dbc.CardBody(
         [
-            html.H5("88%", className="card-title"),
+            html.Label("88%", id="MAPE", className="card-title"),
             html.H6("MAPE", className="card-subtitle"),
         ]
     ),
@@ -143,77 +91,16 @@ card = dbc.Card(
     id="card",
 )
 
-data = OrderedDict(
-    [
-        (
-            "(Simulation Result)",
-            [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-            ],
-        ),
-        (
-            "(Simulation Result2)",
-            [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-            ],
-        ),
-        (
-            "(Simulation Result3)",
-            [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-            ],
-        ),
-        (
-            "(Simulation Result4)",
-            [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-            ],
-        ),
-        (
-            "(Simulation Result5)",
-            [
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-            ],
-        ),
-    ]
-)
 
-
-simulation_df = pd.DataFrame(data)
 # Layout
 
-app.layout = html.Div(
+layout = html.Div(
     [
         dbc.Row(
             [
                 dbc.Col(
                     html.Div(
-                        card,
+                        # card,
                         style={
                             "display": "flex",
                             "align-items": "center",
@@ -224,66 +111,165 @@ app.layout = html.Div(
                 for _ in range(4)
             ],
         ),
-        dbc.Row(makeAlgorithmPrediction()),
+        dbc.Row(id="model_assessment"),
         html.Br(),
         dbc.Row(
             [
+                # dbc.Col(
+                #     dcc.Graph(
+                #         id="bar_graph",
+                #         style={"height": "30vh", "width": "70vh"},
+                #     ),
+                # ),
                 dbc.Col(
                     dcc.Graph(
-                        id="bar_graph",
-                        figure=makeBarGraph(),
-                        style={"height": "30vh", "width": "70vh"},
-                    ),
-                ),
-                dbc.Col(
-                    dcc.Graph(
-                        id="bar_graph",
-                        figure=makeLineGraph(),
-                        style={"height": "30vh", "width": "70vh"},
+                        id="line_graph",
+                        style={"height": "50vh", "width": "70vh"},
                     ),
                 ),
             ]
         ),
         html.Br(),
-        dbc.Row(
+        dcc.Loading(
             [
-                dash_table.DataTable(
-                    data=simulation_df.to_dict("records"),
-                    columns=[{"id": c, "name": c} for c in simulation_df.columns],
-                    id="tbl",
-                    style_header={
-                        "backgroundColor": "rgb(30, 30, 30)",
-                        "color": "white",
-                    },
-                    style_cell={"textAlign": "left"},
-                    style_data={
-                        "backgroundColor": "rgb(50, 50, 50)",
-                        "color": "white",
-                        "fontFamily": "Segoe UI",
-                    },
+                dcc.Store(
+                    id="actual_predict_store",
+                    storage_type="session",
                 ),
-                html.Div(id="container", children=[]),
-                html.Button("modeling data tesing", id="btn_4"),
-            ]
+                dcc.Store(
+                    id="modeling_result_store",
+                    storage_type="session",
+                ),
+            ],
+            # fullscreen=True,
+            type="dot",
         ),
     ]
 )
 
+import math
 
-@app.callback(
-    Output("container", "children"),
-    Trigger("btn_4", "n_clicks"),
-    State("preprocessed_store", "data"),
-    State("container", "children"),
+train_Xn, train_y, test_Xn, test_y, X_test = None, None, None, None, None
+
+
+@callback(
+    Output("modeling_result_store", "data"),
+    Input("preprocessed_store", "data"),
     # prevent_initial_call=True,
+    memoize=True,
 )
-def testing(preprocessed_store, container):
-    print(preprocessed_store)
-    return
-    # tab_container.append(tab1_content)
-    # tab_container.append(tab2_content)
-    # return tab_container
+def store_modeling_result(df):
+    global train_Xn, train_y, test_Xn, test_y, X_test
+
+    # if n_clicks == None:
+    #     raise PreventUpdate
+    df = pd.json_normalize(df)
+    df_veri = prepare_data.extract_veri(df)
+    train_Xn, train_y, test_Xn, test_y, X_test = prepare_data.split_dataset(df)
+    # 모델링 실행
+    rep_prediction = {"value": math.inf}
+
+    """ Modeling """
+    for algorithm_type in ["xgb", "rf", "svr"]:
+        # 모델 만들고 실행
+        model = algorithm.create_model(algorithm_type, train_Xn, train_y)
+        result = algorithm.run(algorithm_type, model, test_Xn, test_y)
+        # 대푯값 비교해서 최소값으로 갱신
+        # if rep_prediction["value"] > result["RMSE"]:
+        #     rep_prediction = result
+        if algorithm_type == "xgb":
+            rep_prediction = result
+    print("Modeling 실행 완료")
+    return rep_prediction
+
+    # Actual: test_y
+    # Predict: xgb_model_predict (rep_prediction['prediction])
 
 
-if __name__ == "__main__":
-    app.run_server()
+@callback(
+    Output("model_assessment", "children"),
+    Input("modeling_result_store", "data"),
+    # prevent_initial_call=True,
+    memoize=True,
+)
+def update_model_assessment(rep_prediction):
+    assessment = ["MAPE_Value", "R_square_XGB", "RMSE"]
+    print("Modeling 평가 결과 저장 완료")
+    return [
+        dbc.Col(
+            daq.LEDDisplay(
+                id="our-LED-display",
+                label=i,
+                value=round(rep_prediction[i], 3),
+                color="#f4d44d",
+                size=24,
+            ),
+            width=3,
+        )
+        for i in assessment
+    ]
+
+
+@callback(
+    Output("actual_predict_store", "data"),
+    Input("modeling_result_store", "data"),
+    prevent_initial_call=True,
+    memoize=True,
+)
+def start_modeling(rep_prediction):
+    global X_test, test_y
+
+    """Actual Predictive Dataframe"""
+    result_df = algorithm.get_actual_predictive(
+        X_test, test_y, rep_prediction["prediction"]
+    )
+    result_df_dict = result_df.to_dict("records")
+    print("Actual Predictive Data 저장 완료")
+
+    return result_df_dict
+
+
+@callback(
+    Output("line_graph", "figure"),
+    Input("actual_predict_store", "data"),
+    # prevent_initial_call=True,
+    memoize=True,
+)
+def draw_actual_predict_graph(df):
+    df = pd.json_normalize(df)
+    trace_list = [
+        go.Scatter(
+            name="Actual",
+            y=df["Actual"],
+            visible=True,
+            mode="lines+markers",
+            line={"width": 1},
+            line_color="#0066E7",
+            marker=dict(size=5),
+        ),
+        go.Scatter(
+            name="Predictive",
+            y=df["Predictive"],
+            visible=True,
+            mode="lines+markers",
+            line={"width": 1},
+            line_color="#D4070F",
+            marker=dict(size=0.3),
+        ),
+    ]
+
+    fig = go.Figure(data=trace_list)
+
+    fig.update_layout(
+        title={
+            "text": "Actual vs Predict",
+            "y": 0.9,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+        }
+    )
+
+    fig.update_layout(template="plotly_dark")
+    print("Actual Predictive 그래프 그리기 완료")
+    return fig

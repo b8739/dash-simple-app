@@ -14,45 +14,28 @@ import time
 import dash_daq as daq
 
 import dash
+from dash import Dash, html, dcc
 import dash_html_components as html
 import dash_auth
 import plotly.express as px
 import pandas as pd
 
-import dash  # pip install dash
 import dash_labs as dl  # pip3 install dash-labs
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
 
 # Code from: https://github.com/plotly/dash-labs/tree/main/docs/demos/multi_page_example1
 
-from dash_extensions.enrich import (
-    DashProxy,
-    PrefixIdTransform,
-    Input,
-    Output,
-    TriggerTransform,
-    ServersideOutputTransform,
-    ServersideOutput,
-    Trigger,
-)
+
 from dash.exceptions import PreventUpdate
 
-from dash.dependencies import Output, Input, State, ALL, MATCH, ALLSMALLER
+from dash.dependencies import Input, Output, State, ALL, MATCH, ALLSMALLER
 import sys
 
 import dash_core_components as dcc
-from dash_extensions.multipage import (
-    PageCollection,
-    app_to_page,
-    module_to_page,
-    Page,
-    CONTENT_ID,
-    URL_ID,
-)
+
+from flask_caching import Cache
 
 sys.path.append("./logic")
-import pages.monitoring as monitoring
-import pages.modeling as modeling
 
 import prepare_data
 import algorithm
@@ -65,19 +48,21 @@ theme = {
     "secondary": "#6E6E6E",
 }
 
-# Create app.
-app = DashProxy(
-    transforms=[
-        TriggerTransform(),  # enable use of Trigger objects
-        ServersideOutputTransform(),  # enable use of ServersideOutput objects
-    ],
+app = Dash(
+    __name__,
     suppress_callback_exceptions=True,
-    # prevent_initial_callbacks=True,
+    plugins=[dl.plugins.pages],
     external_stylesheets=[
         dbc.themes.SLATE,
         dbc.icons.BOOTSTRAP,
-    ],  # CERULEAN,MORPH,MATERIA
+    ],
+    # CERULEAN,MORPH,MATERIA
+    # prevent_initial_callbacks=True,
 )
+cache = Cache(
+    app.server, config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "cache-directory"}
+)
+TIMEOUT = 300
 
 
 def simple_menu(page_collection):
@@ -98,28 +83,12 @@ def simple_menu(page_collection):
     )
 
 
-# page = Page(id="page", label="A page", layout=layout, callbacks=callbacks)
-page = Page(
-    id="page",
-    label="A page",
-)
-
-# Create pages.
-pc = PageCollection(
-    pages=[
-        page,  # page defined in current module
-        app_to_page(
-            monitoring.app,
-            "app",
-            "Monitoring",
-        ),
-        app_to_page(modeling.app, "modeling_app", "Modeling"),
-    ]
-)
-
 mainContents = [
     dbc.Col(
         [
+
+
+            
             dbc.NavbarSimple(
                 brand="Biogas 플랜트 공정 운전 변수 모니터링 및 이상 감지",
                 color="primary",
@@ -130,8 +99,15 @@ mainContents = [
                     "paddingRight": 50,
                 },
                 children=[
-                    html.Div(
-                        simple_menu(pc),
+                    dbc.Nav(
+                        [
+                            dbc.NavItem(
+                                dbc.NavLink(
+                                    page["name"], href=page["path"], active="exact"
+                                )
+                            )
+                            for page in dash.page_registry.values()
+                        ]
                     ),
                     dcc.Dropdown(
                         id="siteDropdown",
@@ -146,9 +122,12 @@ mainContents = [
                     ),
                 ],
             ),
-            html.Div([html.Div(id=CONTENT_ID), dcc.Location(id=URL_ID)]),
         ],
-        # html.Div(children=[[html.Div(id=CONTENT_ID), dcc.Location(id=URL_ID)]]),
+    ),
+    # Contents
+    dbc.Col(
+        dl.plugins.page_container,
+        style={"padding": "30px 50px", "backgroundColor": "#303030"},
     ),
 ]
 
@@ -159,19 +138,19 @@ final = html.Div(
             id="testContainer",
             children=[],
         ),
-        html.Button("Cache 1", id="btn_1"),
-        html.Button("Cache 2", id="btn_2"),
+        html.Button(
+            "Cache 1",
+            id="btn_1",
+        ),
+        html.Button("Cache 2", id="btn_2", style={"display": "None"}),
         dcc.Loading(
             dcc.Store(
-                id="app-preprocessed_store",
+                id="preprocessed_store",
                 storage_type="session",
             ),
-            fullscreen=True,
             type="dot",
         ),
-        dcc.Loading(
-            dcc.Store(id="actual_predictive_store"), fullscreen=True, type="dot"
-        ),
+        dcc.Loading(dcc.Store(id="actual_predictive_store"), type="dot"),
         dbc.Row(
             [dbc.Col(mainContents)],
             className="g-0",
@@ -184,87 +163,19 @@ train_Xn, train_y, test_Xn, test_y, X_test = 0, 0, 0, 0, 0
 
 
 @app.callback(
-    ServersideOutput("app-preprocessed_store", "data"),
+    Output("preprocessed_store", "data"),
     Input("btn_1", "n_clicks"),
-    memoize=True,
 )
+@cache.memoize(timeout=TIMEOUT)
 def preprocess_dataset(n_clicks):
-    if not n_clicks:
-        raise PreventUpdate
+    print("hi")
+
     time.sleep(1)
     df = pd.read_csv("ketep_biogas_data_20220210.csv")
     df = prepare_data.preprocess(df)
-    print("recalculated")
-    return df
+    js = df.to_dict("records")
+    return js
 
-
-# @app.callback(
-#     Output("testContainer", "children"),
-#     [Input("preprocessed_store", "data"), State("testContainer", "children")],
-# )
-# def store_testing2(preprocessed_store, aa):
-#     print("store testing2")
-#     print(preprocessed_store)
-#     return aa
-
-
-# return {
-#     "df": df,
-#     "df_veri": df_veri,
-#     "train_Xn": train_Xn,
-#     "train_y": train_y,
-#     "test_Xn": test_Xn,
-#     "test_y": test_y,
-#     "X_test": X_test,
-# }
-
-
-# @app.callback(
-#     ServersideOutput("preprocessed_store", "data"), Trigger("btn_1", "n_clicks"), memoize=True
-# )
-# def store_precessed_data():
-#     # time.sleep(1)
-#     """Dataset Preprocess"""
-#     df = pd.read_csv("ketep_biogas_data_20220210.csv")
-#     df = prepare_data.preprocess(df)
-#     df_veri = prepare_data.extract_veri(df)
-#     train_Xn, train_y, test_Xn, test_y, X_test = prepare_data.split_dataset(df)
-#     print("dataset working")
-#     return df, df_veri, train_Xn, train_y, test_Xn, test_y, X_test
-
-
-# @app.callback(
-#     ServersideOutput("actual_predictive_store", "data"), Trigger("btn_2", "n_clicks"), memoize=True
-# )
-# def store_actual_predictive_data():
-#     rep_prediction = {"value": math.inf}
-
-#     """ Modeling """
-#     for algorithm_type in ["xgb", "rf", "svr"]:
-#         # 모델 만들고 실행
-#         model = algorithm.create_model(algorithm_type, train_Xn, train_y)
-#         result = algorithm.run(algorithm_type, model, test_Xn, test_y)
-#         # 대푯값 비교해서 최소값으로 갱신
-#         if rep_prediction["value"] > result["RMSE"]:
-#             rep_prediction["algorithm"] = algorithm_type
-#             rep_prediction["prediction"] = result["prediction"]
-
-#     # Actual: test_y
-#     # Predict: xgb_model_predict (rep_prediction['prediction])
-
-#     """ Actual Predictive Dataframe"""
-#     result_df = algorithm.get_actual_predictive(
-#         X_test, test_y, rep_prediction["prediction"]
-#     )
-#     print(result_df)
-#     # df = pd.json_normalize(df)
-#     # df = iris()
-#     return result_df
-
-
-# Register callbacks.
-pc.navigation(app)
-pc.callbacks(app)
 
 app.layout = dbc.Container(
     id="dark-theme-components-1",

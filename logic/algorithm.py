@@ -53,15 +53,25 @@ def create_model(algorithm, train_Xn, train_y):
 def run(algorithm, model, test_Xn, test_y):
     model_predict = model.predict(test_Xn)
     RMSE = mean_squared_error(test_y, model_predict) ** 0.5
+    print(algorithm)
+
     if algorithm == "xgb" or algorithm == "rf":
         # CONFIRM PREDICTION POWER #
-        print("R_square_XGB: ", r2_score(test_y, model_predict))
+        R_square_XGB = r2_score(test_y, model_predict)
+        MAPE_Value = MAPE(test_y, model_predict)
+        print("R_square: ", r2_score(test_y, model_predict))
         print("RMSE: ", RMSE)
         print("MAPE: ", MAPE(test_y, model_predict))
+        return {
+            "prediction": model_predict,
+            "RMSE": RMSE,
+            "R_square_XGB": R_square_XGB,
+            "MAPE_Value": MAPE_Value,
+        }
     elif algorithm == "svr":
         print("RMSE: ", RMSE)
         print("MAPE: ", MAPE(test_y, model_predict))
-    return {"prediction": model_predict, "RMSE": RMSE}
+        return {"prediction": model_predict, "RMSE": RMSE}
 
 
 def get_actual_predictive(x1, y_act, y_pred):

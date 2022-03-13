@@ -1,0 +1,81 @@
+data = OrderedDict(
+    [
+        (
+            "(Simulation Result)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+        (
+            "(Simulation Result2)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+        (
+            "(Simulation Result3)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+        (
+            "(Simulation Result4)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+        (
+            "(Simulation Result5)",
+            [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+            ],
+        ),
+    ]
+)
+simulation_df = pd.DataFrame(data)
+        dbc.Row(
+            [
+                dash_table.DataTable(
+                    data=simulation_df.to_dict("records"),
+                    columns=[{"id": c, "name": c} for c in simulation_df.columns],
+                    id="tbl",
+                    style_header={
+                        "backgroundColor": "rgb(30, 30, 30)",
+                        "color": "white",
+                    },
+                    style_cell={"textAlign": "left"},
+                    style_data={
+                        "backgroundColor": "rgb(50, 50, 50)",
+                        "color": "white",
+                        "fontFamily": "Segoe UI",
+                    },
+                ),
+                html.Div(id="container", children=[]),
+                # html.Button("modeling data tesing", id="btn_4"),
+            ]
+        ),
