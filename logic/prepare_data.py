@@ -69,4 +69,4 @@ def split_dataset(df_01):
     test_Xn = scalerX.transform(test_x)  # Scaling the test data
 
     # train_b = scalerX.inverse_transform(train_Xn)
-    return train_Xn, train_y, test_Xn, test_y, X_test
+    return train_Xn, train_y, test_Xn, test_y, X_test, train_x, test_x

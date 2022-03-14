@@ -1,0 +1,9 @@
+#page-content {
+  padding: 2rem 1rem;
+}
+span,
+p,
+label,
+button {
+  color: #fff !important;
+}
