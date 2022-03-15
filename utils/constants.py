@@ -1,3 +1,15 @@
+monitored_tags = ["PS_incoming", "FW_Feed_A", "Dig_A_Temp", "Dig_Feed_A"]
+
+algorithm_type = ["xgb", "rf", "svr"]
+
+theme = {
+    "dark": True,
+    "detail": "#007439",
+    "primary": "#00EA64",
+    "secondary": "#6E6E6E",
+}
+
+
 home_page_location = "/"
 gdp_page_location = "/gdp"
 iris_page_location = "/iris"

@@ -4,14 +4,19 @@ from dash.dependencies import Input, Output
 
 from app import app
 
-from utils.constants import home_page_location, gdp_page_location, monitoring_location,modeling_location
+from utils.constants import (
+    home_page_location,
+    gdp_page_location,
+    monitoring_location,
+    modeling_location,
+)
 
 from pages.home import home
 from pages.gdp import gdp
 from pages.monitoring import monitoring
 from pages.modeling import modeling
-# from pages.iris import iris
 
+# from pages.iris import iris
 
 
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])

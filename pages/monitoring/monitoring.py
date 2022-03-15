@@ -3,18 +3,9 @@ import dash_html_components as html
 
 import dash_bootstrap_components as dbc
 import dash_daq as daq
+from utils.constants import monitored_tags, theme
 
-from pages.monitoring.monitoring_data import biggas_data
-
-
-monitored_tags = ["PS_incoming", "FW_Feed_A", "Dig_A_Temp", "Dig_Feed_A"]
-
-theme = {
-    "dark": True,
-    "detail": "#007439",
-    "primary": "#00EA64",
-    "secondary": "#6E6E6E",
-}
+from logic.prepare_data import biggas_data
 
 
 def isNormal(idx):
@@ -114,56 +105,90 @@ graphs = (
     ),
 )
 
-dropdowns = [
-    dbc.Col(
-        dcc.Dropdown(
-            id={"type": "tagDropdown", "index": idx},
-            options=[{"label": c, "value": c} for c in monitored_tags],
-            placeholder="Select Tag",
-            value=monitored_tags[idx],
-            clearable=False,
-            # persistence=True, #이것 때문에
-            style={
-                "backgroundColor": "rgb(48, 48, 48)",
-            },
+
+dropdowns = dbc.Collapse(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    dcc.Dropdown(
+                        id={"type": "tagDropdown", "index": idx},
+                        options=[{"label": c, "value": c} for c in monitored_tags],
+                        placeholder="Select Tag",
+                        value=monitored_tags[idx],
+                        clearable=False,
+                        # persistence=True, #이것 때문에
+                        style={
+                            "backgroundColor": "rgb(48, 48, 48)",
+                        },
+                    ),
+                    width=2,
+                )
+                for idx in range(4)
+            ],
+            justify="center",
         ),
-        width=3,
-    )
-    for idx in range(4)
-]
+        html.Br(),
+    ],
+    id="dropdowns-collapse",
+    is_open=True,
+)
+
 
 contents = dbc.Col(
     dcc.Loading(
         children=[
-            dbc.Col(
-                [
-                    html.Span(
-                        # isNormal(idx)["state"],
-                        "Normal",
-                        style={
-                            "marginRight": 15,
-                            "textAlign": "center",
-                        },
-                    ),
-                    daq.Indicator(
-                        id="indicator",
-                        color=theme["primary"],
-                        value="Normal",
-                        className="dark-theme-control",
-                        style={"display": "inline-block"},
-                    ),
-                    dbc.Tooltip("정상 작동중입니다.", target="indicator"),
-                ],
-                style={
-                    "paddingLeft": 12,
-                    "paddingTop": 8,
-                },
-            ),
-            html.Br(),
             dbc.Row(
-                dropdowns,
+                [
+                    dbc.Button(
+                        "Toggle",
+                        color="primary",
+                        id="collapse_btn",
+                        n_clicks=0,
+                        className="d-grid gap-2 col-1",
+                        style={"position": "absolute", "top": 10, "left": 0},
+                    ),
+                    # Normal
+                    dbc.Col(
+                        [
+                            html.Span(
+                                # isNormal(idx)["state"],
+                                "Normal  ",
+                                style={
+                                    "marginRight": 15,
+                                    "textAlign": "center",
+                                },
+                            ),
+                            daq.Indicator(
+                                id="indicator",
+                                color=theme["primary"],
+                                value="Normal",
+                                className="dark-theme-control",
+                                style={"display": "inline-block"},
+                            ),
+                            dbc.Tooltip("정상 작동중입니다.", target="indicator"),
+                            html.Span(
+                                # isNormal(idx)["state"],
+                                "Abnormal",
+                                style={
+                                    "marginLeft": 15,
+                                    "textAlign": "center",
+                                    "color": "grey",
+                                },
+                            ),
+                        ],
+                        style={
+                            "paddingLeft": 12,
+                            "paddingTop": 8,
+                            "text-align": "center",
+                        },
+                        width=6,
+                    ),
+                ],
+                justify="center",
             ),
             html.Br(),
+            dropdowns,
             dbc.Col(
                 graphs,
             ),

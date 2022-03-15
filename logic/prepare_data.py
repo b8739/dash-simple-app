@@ -1,56 +1,57 @@
 import pandas as pd
+
+from app import cache
+from utils.constants import TIMEOUT, monitored_tags
+from logic import prepare_data
+import sys
+import plotly.express as px
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 
-""" 원본 데이터프레임 (df_00) 받아서 데이터 가공하고 df_01 RETURN"""
+@cache.memoize(timeout=TIMEOUT)
+def preprocess_dataset():
+    df = pd.read_excel("ketep_biogas_data_20220314.xlsx")
 
-
-def preprocess(df_00):
-    #### 01. OPEN DATA & PROCESSING ##
-    # 데이터가 읽어져서 패러미터로 들어오니 밑줄 주석
-    # df_00 = pd.read_excel("C:/biogas/ketep_biogas_data_20220210.xlsx")  # Open Excel file
-    # df_00.drop(["Date_0"], axis=1, inplace=True)  # Delete 'Date_0' column
-
-    df_00.rename(
+    df.rename(
         columns={"Date": "date"}, inplace=True
     )  # Change column name from 'Date' to 'date'
 
-    df_00.dtypes  # Find data types
+    df.dtypes  # Find data types
 
-    df_00["date"] = pd.to_datetime(
-        df_00["date"]
+    df["date"] = pd.to_datetime(
+        df["date"]
     )  # Change data type from 'object' to 'datetime'
-    df_01 = df_00.iloc[0:1022, :].copy()  # Train & Test data set
+    df = df.iloc[0:1022, :].copy()  # Train & Test data set
 
-    df_01.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
-    return df_01
+    df.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
+
+    js = df.to_dict("records")
+    return js
 
 
-""" 원본 데이터프레임 (df_00) 받아서 df_veri RETURN"""
+def dataframe():
+    return pd.json_normalize(preprocess_dataset())
 
 
-def extract_veri(df_00):
-    df_veri = df_00.iloc[1022:1029, :].copy()  # Data for Verifying (TTA Test)
+def extract_veri():
+    df = pd.read_excel("ketep_biogas_data_20220314.xlsx")
+    df_veri = df.iloc[1022:1029, :].copy()  # Data for Verifying (TTA Test)
     return df_veri
 
 
-""" 가공된 데이터 데이터프레임 (df_01) 받아서 X,y RETURN"""
-
-
-def get_xy(df_01):
+def get_xy(df):
     ## EXTRACT X & y SEPARATELY ##
-    X = df_01.drop("Biogas_prod", axis=1)  # Take All the columns except 'Biogas_prod'
-    y = df_01["Biogas_prod"]  # Take 'Biogas_prod' column
-    print(X.shape, y.shape)
+    X = df.drop("Biogas_prod", axis=1)  # Take All the columns except 'Biogas_prod'
+    y = df["Biogas_prod"]  # Take 'Biogas_prod' column
     return X, y
 
 
-""" 위 함수에서 x,y 받아서 train_Xn,train_y,test_Xn,test_y,X_test RETURN"""
-
-
-def split_dataset(df_01):
-    X, y = get_xy(df_01)
+@cache.memoize(timeout=TIMEOUT)
+def initial_data():  # split_dataset
+    df = dataframe()
+    X, y = get_xy(df)
     ## SET 'TRAIN', 'TEST' DATA, TRAIN/TEST RATIO, & 'WAY OF RANDOM SAMPLING' ##
     X_train, X_test, train_y, test_y = train_test_split(
         X, y, test_size=0.2, random_state=12345
@@ -69,4 +70,78 @@ def split_dataset(df_01):
     test_Xn = scalerX.transform(test_x)  # Scaling the test data
 
     # train_b = scalerX.inverse_transform(train_Xn)
-    return train_Xn, train_y, test_Xn, test_y, X_test, train_x, test_x
+    return {
+        "train_x": train_x,
+        "train_Xn": train_Xn,
+        "train_y": train_y,
+        "test_Xn": test_Xn,
+        "test_x": test_x,
+        "test_y": test_y,
+        "X_test": X_test,
+        "X": X,
+        "y": y,
+    }
+
+
+@cache.memoize(timeout=TIMEOUT)
+def biggas_data():
+    df = dataframe()
+    tag = initial_data()["y"]
+    fig = px.scatter(df, x="date", y=tag, title=None, template="plotly_dark")
+    fig.update_traces(
+        mode="markers", marker=dict(size=1, line=dict(width=2, color="#f4d44d"))
+    ),
+    fig.update_yaxes(rangemode="normal")
+    # fig.update_xaxes(rangeslider_visible=True)
+    fig.update_layout(
+        yaxis_title=None,
+        xaxis_title="Date",
+        title={
+            "text": "바이오가스 생산량",
+            "xref": "paper",
+            "yref": "paper",
+            "x": 0.5,
+            # "y": 0.5,
+        },
+        margin=dict(l=70, r=70, t=70, b=50),
+    )
+    " " " Quantile 표시 " " "
+    quantile_info = get_quantile_biogas("Biogas_prod")
+    # q_position = df[tag].min() * 1.1
+
+    for q in ["Q1", "Q2", "Q3", "Q4"]:
+        # q_position += df[tag].max() / 4
+
+        fig.add_hline(
+            y=quantile_info["Biogas_prod"][q],
+            line_dash="dot",
+            annotation_text=q,
+            annotation_position="right",
+            opacity=0.9,
+        )
+    return fig
+
+
+@cache.memoize(timeout=TIMEOUT)
+def get_quantile(*args):
+    df = dataframe()
+    res = {}
+    for col in args:
+        res[col] = {}
+        res[col]["Q1"] = df[col].quantile(0.25)
+        res[col]["Q2"] = df[col].quantile(0.5)
+        res[col]["Q3"] = df[col].quantile(0.75)
+        res[col]["Q4"] = df[col].quantile(1)
+    return res
+
+
+@cache.memoize(timeout=TIMEOUT)
+def get_quantile_biogas(col):
+    df = dataframe()
+    res = {}
+    res[col] = {}
+    res[col]["Q1"] = df[col].quantile(0.25)
+    res[col]["Q2"] = df[col].quantile(0.5)
+    res[col]["Q3"] = df[col].quantile(0.75)
+    res[col]["Q4"] = df[col].quantile(1)
+    return res

@@ -11,6 +11,7 @@ import plotly.express as px
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
 import dash_daq as daq
 from pages.modeling.modeling_data import get_modeling_assessment
+from utils.constants import theme
 
 from dash_extensions.enrich import (
     DashProxy,
@@ -21,13 +22,6 @@ from dash_extensions.enrich import (
     ServersideOutput,
     Trigger,
 )
-
-theme = {
-    "dark": True,
-    "detail": "#007439",
-    "primary": "#00EA64",
-    "secondary": "#6E6E6E",
-}
 
 
 algorithm_list = ["XGBoost", "SVR", "LSTM", "Ensemble"]
@@ -70,8 +64,24 @@ layout = html.Div(
             ],
         ),
         dbc.Row(get_modeling_assessment(), id="model_assessment"),
+        dbc.Row(
+            dbc.Col(
+                daq.LEDDisplay(
+                    id="predict_value",
+                    label="Predict Value",
+                    color="#f4d44d",
+                    size=24,
+                    value=0,
+                ),
+                width=3,
+            )
+        ),
         html.Br(),
-        dbc.Row([dbc.Col(html.Button(i)) for i in range(7)]),
+        dcc.Dropdown(
+            id="predict_dropdown",
+            options=[{"label": str(i) + "번째 데이터", "value": i} for i in range(1, 8)],
+            # value="sepal width (cm)",
+        ),
         html.Br(),
         dbc.Row(
             [
@@ -107,6 +117,10 @@ layout = html.Div(
                 ),
                 dcc.Store(
                     id="modeling_result_store",
+                    storage_type="session",
+                ),
+                dcc.Store(
+                    id="predict_store",
                     storage_type="session",
                 ),
             ],

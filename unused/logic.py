@@ -64,7 +64,7 @@ os.chdir("C:/biogas/")
 
 #### 01. OPEN DATA & PROCESSING ##
 
-df_00 = pd.read_excel("C:/biogas/ketep_biogas_data_20220210.xlsx")  # Open Excel file
+df_00 = pd.read_excel("ketep_biogas_data_20220314.xlsx")
 
 df_00.drop(["Date_0"], axis=1, inplace=True)  # Delete 'Date_0' column
 
@@ -149,7 +149,6 @@ ts_plot_n2(df_01, "Dig_Dewater", 60)
 df_01.Biogas_prod.quantile(0.25)
 df_01.Biogas_prod.quantile(0.5)
 df_01.Biogas_prod.quantile(0.75)
-
 df_01.Biogas_prod.describe()
 
 df_01.columns

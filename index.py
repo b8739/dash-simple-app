@@ -1,4 +1,4 @@
-from app import app, server
+from app import app, server, cache
 
 from routes import render_page_content
 
@@ -13,10 +13,12 @@ from environment.settings import APP_HOST, APP_PORT, APP_DEBUG, DEV_TOOLS_PROPS_
 
 
 if __name__ == "__main__":
+    # cache.clear()
+
     app.run_server(
         host=APP_HOST,
         port=APP_PORT,
         # debug=APP_DEBUG,
         debug=True,
-        dev_tools_props_check=DEV_TOOLS_PROPS_CHECK
+        dev_tools_props_check=DEV_TOOLS_PROPS_CHECK,
     )
