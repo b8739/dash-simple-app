@@ -484,3 +484,159 @@ plt.plot(
 )
 plt.title("Actual(blue) vs. XGB Predictive(orange)")
 plt.show()
+
+
+""" """ """""" """""" """ 03. ANOMALY DETECTION  """ """""" """""" """" """
+
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import accuracy_score
+
+
+#### 01. OPEN DATA & PROCESSING ##
+
+df_00 = pd.read_excel("C:/biogas/ketep_biogas_data_20220314.xlsx")  # Open Excel file
+df_00.drop(["Date_0"], axis=1, inplace=True)  # Delete 'Date_0' column
+df_00.rename(
+    columns={"Date": "date"}, inplace=True
+)  # Change column name from 'Date' to 'date'
+
+df_00["date"] = pd.to_datetime(
+    df_00["date"]
+)  # Change data type from 'object' to 'datetime'
+df_01 = df_00.iloc[0:1022, :]  # Train & Test data set
+df_01.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
+
+df_veri = df_00.iloc[1022:1029, :]  # Data for Verifying (TTA Test)
+
+
+X = df_01.drop(["Biogas_prod"], axis=1)
+# X.dropna(axis=0, inplace=True)             # Delete entire rows which have the NAs
+y = df_01["Biogas_prod"]
+
+
+# np.random.seed(1)
+# df = df_01.iloc[np.random.permutation(len(df_01))]
+
+# df_ad = df_01[:900]
+# df_y = df_01["Biogas_prod"]
+# df_validate = df[900:]
+
+X_train_0, X_test_0, train_y, test_y = train_test_split(
+    X, y, test_size=0.2, random_state=123
+)
+# X_val, val_y = df_validate, df_validate["Biogas_prod"]
+
+
+print("Shapes:\nX_train:%s\ntrain_y:%s\n" % (X_train_0.shape, train_y.shape))
+print("X_test:%s\ntest_y:%s\n" % (X_test_0.shape, test_y.shape))
+# print("x_val:%s\ny_val:%s\n" % (X_val.shape, y_val.shape))
+
+X_train_0 = X_train_0.reset_index(drop=True)
+train_y = train_y.reset_index(drop=True)
+X_test_0 = X_test_0.reset_index(drop=True)
+test_y = test_y.reset_index(drop=True)
+
+
+X_train = X_train_0.drop(columns=["date"])
+X_test = X_test_0.drop(columns=["date"])
+
+
+###############   APPLY "ISOLATION FOREST ALGORITHM"     ######################
+
+isolation_forest = IsolationForest(n_estimators=500, max_samples=256, random_state=1)
+isolation_forest.fit(X_train)
+
+
+# 학습데이터에 대한 Score 값 확인 #
+a_scores_train = -1 * isolation_forest.score_samples(X_train)
+print(a_scores_train)
+
+plt.figure(figsize=(15, 5))
+plt.hist(a_scores_train, bins=100)
+plt.xlabel("Average Path Lengths", fontsize=14)
+plt.ylabel("Number of Data Points", fontsize=14)
+plt.show()
+
+
+# Score 0.6 이상이면 Anomaly 라 정의 : 이상치 위치 확인 #
+print(np.where(a_scores_train >= 0.60))
+print(a_scores_train[np.where(a_scores_train >= 0.60)])
+
+over_6 = list(np.where(a_scores_train >= 0.60)[0])
+a_scores_train_1st = -1 * isolation_forest.score_samples(X_train.iloc[over_6, :])
+a_scores_train_1st
+
+
+## 테스트 데이터에 대한 확인 ##
+a_scores_test = -1 * isolation_forest.score_samples(X_test)
+print(a_scores_test)
+
+## For Test Data
+
+plt.figure(figsize=(15, 5))
+plt.hist(a_scores_test, bins=100)
+plt.xlabel("Average Path Lengths", fontsize=14)
+plt.ylabel("Number of Data Points", fontsize=14)
+plt.show()
+
+print(np.where(a_scores_test >= 0.60))
+print(a_scores_test[np.where(a_scores_test >= 0.60)])
+
+over_6 = list(np.where(a_scores_test >= 0.60)[0])
+a_scores_test_1st = -1 * isolation_forest.score_samples(X_test.iloc[over_6, :])
+a_scores_test_1st
+
+
+## For Verification Data : TTA 테스트 데이터 (7개)
+
+X_veri = df_veri.drop(columns=["date", "Biogas_prod"])
+veri_y = df_veri["Biogas_prod"]
+
+a_scores_veri = -1 * isolation_forest.score_samples(X_veri)
+print(a_scores_veri)
+
+plt.figure(figsize=(15, 5))
+plt.hist(a_scores_veri, bins=100)
+plt.xlabel("Average Path Lengths", fontsize=14)
+plt.ylabel("Number of Data Points", fontsize=14)
+plt.show()
+
+print(np.where(a_scores_veri >= 0.60))
+print(a_scores_veri[np.where(a_scores_veri >= 0.60)])
+
+
+## Verification Data :
+# '2020-06-06 00:00:00',  '2020-06-07 00:00:00'
+
+
+## 개별 변수의 이상 여부를 결정할 수 있는 방법
+
+X_train.quantile(0.025)
+X_train.iloc[
+    479,
+]
+compare_train = pd.concat(
+    [
+        pd.Series(X_train.quantile(0.025)),
+        pd.Series(
+            X_train.iloc[
+                479,
+            ]
+        ),
+    ],
+    axis=1,
+)
+
+print(compare_train)  # 첫 번째 컬럼값 (2.5% 미만)보다 작은 값이면 이상치로 적용
+
+
+###################      END OF ANOMALY DETECTION        ##################
+
+
+ts_plot_n2(df_01, "Treated_FW", 120)
+
+sns.distplot(df_01["Biogas_prod"])
+
+df_01.Biogas_prod.mean()

@@ -102,6 +102,12 @@ layout = html.Div(
                         style={"height": "50vh", "width": "70vh"},
                     ),
                 ),
+                dbc.Col(
+                    dcc.Graph(
+                        id="dependence_plot",
+                        style={"height": "50vh", "width": "70vh"},
+                    ),
+                ),
             ]
         ),
         html.Br(),
@@ -112,7 +118,11 @@ layout = html.Div(
                     storage_type="session",
                 ),
                 dcc.Store(
-                    id="shap_store",
+                    id="shap_values_store",
+                    storage_type="session",
+                ),
+                                dcc.Store(
+                    id="shap_importance_store",
                     storage_type="session",
                 ),
                 dcc.Store(

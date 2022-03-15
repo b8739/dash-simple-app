@@ -1,7 +1,7 @@
 from dash.dependencies import Output, Input, State, ALL, MATCH, ALLSMALLER
 import pandas as pd
 import plotly.express as px
-from logic.prepare_data import dataframe, get_quantile
+from logic.prepare_data import dataframe, get_quantile, get_avg
 from utils.constants import monitored_tags
 from app import app
 from app import cache
@@ -58,7 +58,7 @@ def changeTag(tag):
     " " " Average 표시 " " "
 
     fig.add_annotation(
-        text="Avg: 24",
+        text="Avg: " + get_avg(tag),
         align="left",
         showarrow=False,
         xref="paper",

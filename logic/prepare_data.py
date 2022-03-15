@@ -31,8 +31,13 @@ def preprocess_dataset():
     return js
 
 
+@cache.memoize(timeout=TIMEOUT)
 def dataframe():
     return pd.json_normalize(preprocess_dataset())
+
+
+def get_avg(tag):
+    return str(round(dataframe()[tag].mean(), 3))
 
 
 def extract_veri():

@@ -146,7 +146,7 @@ contents = dbc.Col(
                         id="collapse_btn",
                         n_clicks=0,
                         className="d-grid gap-2 col-1",
-                        style={"position": "absolute", "top": 10, "left": 0},
+                        style={"position": "absolute", "top": 10, "left": 7},
                     ),
                     # Normal
                     dbc.Col(
