@@ -56,3 +56,4 @@ lightgbm==3.3.2
 plotly==5.5.0
 scikit-learn==1.0.2
 shap==0.40.0
+openpyxl
