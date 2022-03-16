@@ -25,6 +25,8 @@ app = dash.Dash(
         CUSTOM_STYLE,
     ],
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
+    assets_folder="static",
+    assets_url_path="static",
 )
 
 cache = Cache(

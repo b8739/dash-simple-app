@@ -13,16 +13,6 @@ import dash_daq as daq
 from pages.modeling.modeling_data import get_modeling_assessment
 from utils.constants import theme
 
-from dash_extensions.enrich import (
-    DashProxy,
-    Input,
-    Output,
-    TriggerTransform,
-    ServersideOutputTransform,
-    ServersideOutput,
-    Trigger,
-)
-
 
 algorithm_list = ["XGBoost", "SVR", "LSTM", "Ensemble"]
 
@@ -77,10 +67,17 @@ layout = html.Div(
             )
         ),
         html.Br(),
-        dcc.Dropdown(
-            id="predict_dropdown",
-            options=[{"label": str(i) + "번째 데이터", "value": i} for i in range(1, 8)],
-            # value="sepal width (cm)",
+        dbc.Row(
+            dbc.Col(
+                dcc.Dropdown(
+                    id="predict_dropdown",
+                    options=[
+                        {"label": str(i) + "번째 데이터", "value": i} for i in range(1, 8)
+                    ],
+                    # value="sepal width (cm)",
+                ),
+                width=3,
+            )
         ),
         html.Br(),
         dbc.Row(
@@ -121,7 +118,7 @@ layout = html.Div(
                     id="shap_values_store",
                     storage_type="session",
                 ),
-                                dcc.Store(
+                dcc.Store(
                     id="shap_importance_store",
                     storage_type="session",
                 ),

@@ -22,9 +22,7 @@ from pages.modeling import modeling
 @app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname == home_page_location:
-        return home.layout
-    elif pathname == gdp_page_location:
-        return gdp.layout
+        return monitoring.layout
     elif pathname == monitoring_location:
         return monitoring.layout
     elif pathname == modeling_location:

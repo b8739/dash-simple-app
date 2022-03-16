@@ -69,8 +69,8 @@ sidebar = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
-                    dbc.NavLink("Home", href=home_page_location, active="exact"),
-                    dbc.NavLink("GDP", href=gdp_page_location, active="exact"),
+                    # dbc.NavLink("Home", href=home_page_location, active="exact"),
+                    # dbc.NavLink("GDP", href=gdp_page_location, active="exact"),
                     dbc.NavLink(
                         "모니터링 (Monitoring)", href=monitoring_location, active="exact"
                     ),
