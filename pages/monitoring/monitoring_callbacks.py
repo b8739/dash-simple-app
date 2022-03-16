@@ -3,12 +3,13 @@ import pandas as pd
 import plotly.express as px
 from logic.prepare_data import dataframe, get_quantile, get_avg
 from utils.constants import monitored_tags
-from app import app
+from app import application
+
 from app import cache
 from utils.constants import TIMEOUT
 
 
-@app.callback(
+@application.callback(
     Output({"type": "monitoring-graph", "index": MATCH}, "figure"),
     Input({"type": "tagDropdown", "index": MATCH}, "value"),
 )
@@ -86,7 +87,7 @@ def changeTag(tag):
     return fig
 
 
-@app.callback(
+@application.callback(
     Output("dropdowns-collapse", "is_open"),
     [Input("collapse_btn", "n_clicks")],
     [State("dropdowns-collapse", "is_open")],

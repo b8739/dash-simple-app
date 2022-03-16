@@ -4,8 +4,7 @@ from routes import render_page_content
 
 from layout.sidebar.sidebar_callbacks import toggle_collapse, toggle_classname
 
-from pages.gdp.gdp_callbacks import update_figure
-from pages.iris.iris_callbacks import make_graph
+
 from pages.monitoring.monitoring_callbacks import changeTag
 from pages.modeling.modeling_callbacks import draw_actual_predict_graph
 

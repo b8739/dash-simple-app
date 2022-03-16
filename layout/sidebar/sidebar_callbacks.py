@@ -1,9 +1,9 @@
 from dash.dependencies import Input, Output, State
 
-from app import app
+from app import application
 
 
-@app.callback(
+@application.callback(
     Output("sidebar", "className"),
     [Input("sidebar-toggle", "n_clicks")],
     [State("sidebar", "className")],
@@ -14,7 +14,7 @@ def toggle_classname(n, classname):
     return ""
 
 
-@app.callback(
+@application.callback(
     Output("collapse", "is_open"),
     [Input("navbar-toggle", "n_clicks")],
     [State("collapse", "is_open")],

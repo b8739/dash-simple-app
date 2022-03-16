@@ -2,7 +2,8 @@ from dash.dependencies import Output, Input, State, ALL, MATCH, ALLSMALLER
 import pandas as pd
 import plotly.express as px
 from pages.modeling.modeling_data import get_modeling_result, initial_data, verify
-from app import app
+from app import application
+
 import plotly.graph_objs as go
 import math
 from logic import algorithm
@@ -19,7 +20,7 @@ from logic.prepare_data import dataframe
 from utils.constants import theme
 
 
-@app.callback(
+@application.callback(
     Output("actual_predict_store", "data"),
     Input("btn_3", "n_clicks"),
 )
@@ -36,7 +37,7 @@ def save_actual_predictive_df(n_clicks):
     return result_df_dict
 
 
-@app.callback(
+@application.callback(
     Output("line_graph", "figure"),
     Input("actual_predict_store", "data"),
 )
@@ -98,7 +99,7 @@ def get_shap_values():
     return shap_values
 
 
-@app.callback(
+@application.callback(
     Output("shap_importance_store", "data"),
     Input("btn_3", "n_clicks"),
 )
@@ -124,7 +125,7 @@ def get_shap_importance(n_clicks):
     return shap_importance_dict
 
 
-@app.callback(
+@application.callback(
     Output("bar_graph", "figure"),
     Input("shap_importance_store", "data"),
 )
@@ -149,7 +150,7 @@ def draw_shap_bar_graph(df):
     return fig
 
 
-@app.callback(
+@application.callback(
     Output("dependence_plot", "figure"),
     Input("shap_values_store", "data"),
 )
@@ -203,7 +204,7 @@ def draw_shap_dependence_graph(shap_values):
     return fig
 
 
-@app.callback(
+@application.callback(
     Output("predict_value", "value"),
     Input("predict_dropdown", "value"),
     prevent_initial_call=True,

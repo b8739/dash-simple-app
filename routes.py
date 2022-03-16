@@ -2,24 +2,21 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from app import app
+from app import application
 
 from utils.constants import (
     home_page_location,
-    gdp_page_location,
     monitoring_location,
     modeling_location,
 )
 
-from pages.home import home
-from pages.gdp import gdp
 from pages.monitoring import monitoring
 from pages.modeling import modeling
 
 # from pages.iris import iris
 
 
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+@application.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
     if pathname == home_page_location:
         return monitoring.layout
