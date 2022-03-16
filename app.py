@@ -13,7 +13,7 @@ from utils.constants import theme
 
 server = flask.Flask(__name__)  # define flask app.server
 
-app = dash.Dash(
+application = dash.Dash(
     __name__,
     server=server,
     suppress_callback_exceptions=True,
@@ -30,10 +30,11 @@ app = dash.Dash(
 )
 
 cache = Cache(
-    app.server, config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "cache-directory"}
+    application.server,
+    config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "cache-directory"},
 )
 cache.clear()
-app.layout = dbc.Container(
+application.layout = dbc.Container(
     id="dark-theme-components-1",
     children=[daq.DarkThemeProvider(theme=theme, children=layout)],
     fluid=True,
@@ -43,4 +44,4 @@ app.layout = dbc.Container(
 )
 
 
-server = app.server
+server = application.server
