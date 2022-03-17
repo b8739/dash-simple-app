@@ -67,7 +67,7 @@ tab1_content = dbc.Tab(
             [
                 dbc.Row(
                     plotMonitoringGraphs("monitoring-graph", 4),
-                    className="g-0",
+                    # className="g-0",
                 )
             ]
         ),
@@ -97,7 +97,7 @@ graphs = (
             [
                 dbc.Row(
                     plotMonitoringGraphs("monitoring-graph", 4),
-                    className="g-0",
+                    className="g-3",
                 )
             ]
         ),
@@ -126,28 +126,39 @@ dropdowns = dbc.Collapse(
                 )
                 for idx in range(4)
             ],
-            justify="center",
+            justify="left",
         ),
         html.Br(),
     ],
     id="dropdowns-collapse",
     is_open=True,
 )
-
+indicator_content = (
+    daq.Indicator(
+        # id="indicator2",
+        color="red",
+        value="Abnormal",
+        className="dark-theme-control",
+        style={"display": "inline-block"},
+    ),
+)
 
 contents = dbc.Col(
     dcc.Loading(
         children=[
             dbc.Row(
                 [
-                    dbc.Button(
-                        "Toggle",
-                        color="primary",
-                        id="collapse_btn",
-                        n_clicks=0,
-                        className="d-grid gap-2 col-1",
-                        style={"position": "absolute", "top": 10, "left": 7},
+                    dbc.Col(
+                        html.H2("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
                     ),
+                    # dbc.Button(
+                    #     "Toggle",
+                    #     color="primary",
+                    #     id="collapse_btn",
+                    #     n_clicks=0,
+                    #     className="d-grid gap-2 col-1",
+                    #     style={"position": "absolute", "top": 10, "left": 7},
+                    # ),
                     # Normal
                     dbc.Col(
                         [
@@ -155,7 +166,7 @@ contents = dbc.Col(
                                 # isNormal(idx)["state"],
                                 "Normal  ",
                                 style={
-                                    "marginRight": 15,
+                                    "marginRight": 10,
                                     "textAlign": "center",
                                 },
                             ),
@@ -171,23 +182,32 @@ contents = dbc.Col(
                                 # isNormal(idx)["state"],
                                 "Abnormal",
                                 style={
-                                    "marginLeft": 15,
+                                    "marginLeft": 20,
+                                    "marginRight": 10,
                                     "textAlign": "center",
                                     "color": "grey",
                                 },
                             ),
+                            daq.Indicator(
+                                id="indicator2",
+                                color="red",
+                                value="Abnormal",
+                                className="dark-theme-control",
+                                style={"display": "inline-block"},
+                            ),
                         ],
                         style={
-                            "paddingLeft": 12,
                             "paddingTop": 8,
-                            "text-align": "center",
+                            "paddingRight": 10,
+                            "text-align": "right",
+                            "marginTop": 15,
+                            "marginBottom": 15,
                         },
-                        width=6,
+                        width=4,
                     ),
                 ],
-                justify="center",
+                justify="between",
             ),
-            html.Br(),
             dropdowns,
             dbc.Col(
                 graphs,

@@ -35,22 +35,26 @@ def changeTag(tag):
             "xref": "paper",
             "yref": "paper",
             "x": 0.5,
-            # "font": {"size": 15}
+            "font": {"size": 15}
             # "y": 0.5,
         },
-        margin=dict(l=70, r=70, t=30, b=90, pad=20),
+        margin=dict(l=70, r=70, t=70, b=90, pad=20),
         # pad=dict(l=100, r=100, t=30, b=100),
     )
     " " " Quantile 표시 " " "
     quantile_info = get_quantile(*monitored_tags)
     # q_position = df[tag].min() * 1.1
 
-    for q in ["Q1", "Q2", "Q3", "Q4"]:
+    for q in [
+        "Q1",
+        "Q3",
+    ]:
         # q_position += df[tag].max() / 4
 
         fig.add_hline(
             y=quantile_info[tag][q],
             line_dash="dot",
+            line_color="orange",
             annotation_text=q,
             annotation_position="right",
             opacity=0.9,
@@ -64,7 +68,7 @@ def changeTag(tag):
         showarrow=False,
         xref="paper",
         yref="paper",
-        x=1.1,
+        x=1,
         y=1.1,
         bordercolor="black",
         borderwidth=1,

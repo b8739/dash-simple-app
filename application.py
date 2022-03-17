@@ -6,7 +6,10 @@ from layout.sidebar.sidebar_callbacks import toggle_collapse, toggle_classname
 
 
 from pages.monitoring.monitoring_callbacks import changeTag
-from pages.modeling.modeling_callbacks import draw_actual_predict_graph
+
+from pages.modeling.modeling_callbacks import (
+    draw_actual_predict_graph,
+)  # 시간 오래 걸려서 잠깐 주석 처리
 
 from environment.settings import APP_HOST, APP_PORT, APP_DEBUG, DEV_TOOLS_PROPS_CHECK
 

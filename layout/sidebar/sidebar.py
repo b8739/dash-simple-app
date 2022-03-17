@@ -14,7 +14,7 @@ from utils.constants import (
 # it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = dbc.Row(
     [
-        dbc.Col(html.H2("Sidebar", className="display-4")),
+        dbc.Col(html.H2("사이드 바", className="display-4")),
         dbc.Col(
             [
                 html.Button(
@@ -58,7 +58,7 @@ sidebar = html.Div(
             [
                 html.Hr(),
                 html.P(
-                    "Biogas 플랜트 공정 운전 변수 모니터링 및 이상 감지",
+                    "기능 구성",
                     style={"color": "#fff"},
                     className="lead",
                 ),

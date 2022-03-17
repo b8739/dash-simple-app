@@ -114,12 +114,13 @@ def biggas_data():
     quantile_info = get_quantile_biogas("Biogas_prod")
     # q_position = df[tag].min() * 1.1
 
-    for q in ["Q1", "Q2", "Q3", "Q4"]:
+    for q in ["Q1", "Q3"]:
         # q_position += df[tag].max() / 4
 
         fig.add_hline(
             y=quantile_info["Biogas_prod"][q],
             line_dash="dot",
+            line_color="#FFA500",
             annotation_text=q,
             annotation_position="right",
             opacity=0.9,
