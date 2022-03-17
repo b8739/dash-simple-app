@@ -131,8 +131,8 @@ layout = html.Div(
                     storage_type="session",
                 ),
             ],
-            # fullscreen=True,
-            type="dot",
+            fullscreen=True,
+            type="circle",
         ),
     ]
 )

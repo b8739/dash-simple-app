@@ -34,6 +34,7 @@ cache = Cache(
     config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "cache-directory"},
 )
 cache.clear()
+
 application.layout = dbc.Container(
     id="dark-theme-components-1",
     children=[daq.DarkThemeProvider(theme=theme, children=layout)],

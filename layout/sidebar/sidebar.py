@@ -14,7 +14,7 @@ from utils.constants import (
 # it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = dbc.Row(
     [
-        dbc.Col(html.H2("사이드 바", className="display-4")),
+        dbc.Col(html.H2("Sidebar", className="display-4")),
         dbc.Col(
             [
                 html.Button(
