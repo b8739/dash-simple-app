@@ -149,7 +149,7 @@ contents = dbc.Col(
             dbc.Row(
                 [
                     dbc.Col(
-                        html.H2("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
+                        html.H4("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
                     ),
                     # dbc.Button(
                     #     "Toggle",

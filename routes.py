@@ -30,7 +30,7 @@ def render_page_content(pathname):
     return dbc.Jumbotron(
         [
             html.H1("404: Not found", className="text-danger"),
-            html.Hr(),
+            html.Hr(style={"marginTop": 15, "marginBottom": 15}),
             html.P(f"The pathname {pathname} was not recognised..."),
         ]
     )
