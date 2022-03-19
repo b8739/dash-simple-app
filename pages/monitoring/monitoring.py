@@ -21,7 +21,7 @@ def plotMonitoringGraphs(graph_type, graph_number):
         dcc.Graph(
             figure=biggas_data(),
             id="biggas_graph",
-            style={"height": "30vh"},
+            style={"height": "25vh"},
         )
     ]
     for idx in range(graph_number):
@@ -118,9 +118,7 @@ dropdowns = dbc.Collapse(
                         value=monitored_tags[idx],
                         clearable=False,
                         # persistence=True, #이것 때문에
-                        style={
-                            "backgroundColor": "rgb(48, 48, 48)",
-                        },
+                        style={"backgroundColor": "rgb(48, 48, 48)"},
                     ),
                     width=2,
                 )
@@ -128,7 +126,7 @@ dropdowns = dbc.Collapse(
             ],
             justify="left",
         ),
-        html.Br(),
+        # html.Br(),
     ],
     id="dropdowns-collapse",
     is_open=True,
@@ -149,7 +147,7 @@ contents = dbc.Col(
             dbc.Row(
                 [
                     dbc.Col(
-                        html.H4("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
+                        html.H5("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
                     ),
                     # dbc.Button(
                     #     "Toggle",
@@ -200,7 +198,7 @@ contents = dbc.Col(
                             "paddingTop": 8,
                             "paddingRight": 10,
                             "text-align": "right",
-                            "marginTop": 15,
+                            # "marginTop": 15,
                             "marginBottom": 15,
                         },
                         width=4,
