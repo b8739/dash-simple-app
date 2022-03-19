@@ -25,18 +25,36 @@ def plotMonitoringGraphs(graph_type, graph_number):
         )
     ]
     for idx in range(graph_number):
+        # children.append(indicator_content)
         children.append(
             dbc.Col(
                 [
+                    daq.Indicator(
+                        id="indicator",
+                        color=theme["primary"],
+                        value="Normal",
+                        className="dark-theme-control",
+                        style={
+                            "display": "inline-block",
+                            "position": "absolute",
+                            "zIndex": 1,
+                            "top": 33,
+                            "left": 35,
+                        },
+                    ),
                     # html.Br(),
                     dcc.Graph(
                         id={"type": graph_type, "index": idx},
-                        style={"height": "30vh"},
+                        style={
+                            "height": "30vh",
+                            "zIndex": 2,
+                        },
                     ),
                     # html.Br(),
                 ],
                 width=6,
-            )
+                style={"position": "relative"},
+            ),
         )
     return children
 
@@ -118,7 +136,7 @@ dropdowns = dbc.Collapse(
                         value=monitored_tags[idx],
                         clearable=False,
                         # persistence=True, #이것 때문에
-                        style={"backgroundColor": "rgb(48, 48, 48)"},
+                        style={"backgroundColor": "rgb(48, 48, 48)", "display": "none"},
                     ),
                     width=2,
                 )
@@ -131,15 +149,7 @@ dropdowns = dbc.Collapse(
     id="dropdowns-collapse",
     is_open=True,
 )
-indicator_content = (
-    daq.Indicator(
-        # id="indicator2",
-        color="red",
-        value="Abnormal",
-        className="dark-theme-control",
-        style={"display": "inline-block"},
-    ),
-)
+
 
 contents = dbc.Col(
     dcc.Loading(

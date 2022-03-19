@@ -107,6 +107,7 @@ def changeTag(tag):
         bordercolor="black",
         borderwidth=1,
     )
+    cols = list(df.columns)
     fig.update_layout(
         updatemenus=[
             dict(
@@ -116,6 +117,14 @@ def changeTag(tag):
                             args=[
                                 {"y": [df[col]]},
                                 {
+                                    "title": {
+                                        "text": col,
+                                        "font": {"size": 15},
+                                        "xref": "paper",
+                                        "x": 0.5,
+                                        "xanchor": "center",
+                                        "yanchor": "middle",
+                                    },
                                     "yaxis": {
                                         "range": [
                                             min(df[col]) - 0.2 * min(df[col]),
@@ -166,17 +175,21 @@ def changeTag(tag):
                             label=col,
                             method="update",
                         )
-                        for col in df.columns
+                        for col in [cols.pop(cols.index(tag))] + cols
                         if col != "date"
                     ]
                 ),
                 direction="down",
                 pad={"r": 10, "t": 10},
                 showactive=True,
-                x=0.1,
-                xanchor="left",
-                y=1.1,
+                font=dict(size=15),
+                x=0.5,
+                y=1.6,
+                xanchor="center",
                 yanchor="top",
+                bordercolor="white",
+                # bgcolor="#333",
+                bgcolor="rgb(24,20,20)",
             ),
         ]
     )

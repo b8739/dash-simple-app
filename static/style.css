@@ -7,3 +7,11 @@ label,
 button {
   color: #fff !important;
 }
+.updatemenu-item-rect {
+  /* fill: #000 !important; */
+  fill: rgb(24, 20, 20) !important;
+}
+
+.updatemenu-item-rect:hover {
+  fill: rgb(120, 120, 120) !important;
+}
