@@ -44,15 +44,16 @@ def make_quantile_annotation(name, y_pos):
 def changeTag(tag):
     " " " Plotly Graph 생성 " " "
     df = dataframe()
+    df = df.iloc[len(df) - 100 : 1022]
 
     if not tag:
         tag = df.columns[3]
     fig = px.scatter(df, x="date", y=tag, title=None, template="plotly_dark")
 
     fig.update_traces(
-        mode="markers", marker=dict(size=0.5, line=dict(width=2, color="#f4d44d"))
+        mode="markers", marker=dict(size=2, line=dict(width=2, color="#f4d44d"))
     ),
-
+    # fig.update_layout(paper_bgcolor="#121212", plot_bgcolor="#121212")
     fig.update_yaxes(rangemode="normal")
 
     fig.update_yaxes(range=[df[tag].min() * (0.8), df[tag].max() * (1.2)])

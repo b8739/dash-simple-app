@@ -14,4 +14,5 @@ button {
 
 .updatemenu-item-rect:hover {
   fill: rgb(120, 120, 120) !important;
+  /* fill:#121212 */
 }

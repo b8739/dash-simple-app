@@ -91,10 +91,11 @@ def initial_data():  # split_dataset
 @cache.memoize(timeout=TIMEOUT)
 def biggas_data():
     df = dataframe()
-    tag = initial_data()["y"]
+    df = df.iloc[len(df) - 100 : 1022]
+    tag = "Biogas_prod"
     fig = px.scatter(df, x="date", y=tag, title=None, template="plotly_dark")
     fig.update_traces(
-        mode="markers", marker=dict(size=1, line=dict(width=2, color="#f4d44d"))
+        mode="markers", marker=dict(size=2, line=dict(width=2, color="#f4d44d"))
     ),
     fig.update_yaxes(rangemode="normal")
     # fig.update_xaxes(rangeslider_visible=True)

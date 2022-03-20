@@ -11,7 +11,6 @@ import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-component
 import dash_daq as daq
 from xgboost import XGBRegressor
 import numpy as np
-import shap
 from app import cache
 from utils.constants import TIMEOUT
 from plotly.subplots import make_subplots
@@ -52,7 +51,7 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#0066E7",
+            line_color="#08a4a7",
             marker=dict(size=5),
         ),
         go.Scatter(
@@ -62,7 +61,7 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#D4070F",
+            line_color="#f1444c",
             marker=dict(size=0.3),
         ),
     ]
@@ -81,126 +80,6 @@ def draw_actual_predict_graph(df):
 
     fig.update_layout(template="plotly_dark")
     print("Actual Predictive 그래프 그리기 완료")
-    return fig
-
-
-""" SHAP """
-
-
-@cache.memoize(timeout=TIMEOUT)
-def get_shap_values():
-    train_x = initial_data()["train_x"]
-    train_y = initial_data()["train_y"]
-    model = XGBRegressor()
-    model.fit(train_x, train_y)
-
-    shap_values = shap.TreeExplainer(model).shap_values(train_x)
-
-    return shap_values
-
-
-@application.callback(
-    Output("shap_importance_store", "data"),
-    Input("btn_3", "n_clicks"),
-)
-@cache.memoize(timeout=TIMEOUT)
-def get_shap_importance(n_clicks):
-    train_x = initial_data()["train_x"]
-
-    shap_values = get_shap_values()
-    feature_names = train_x.columns
-
-    rf_resultX = pd.DataFrame(shap_values, columns=feature_names)
-    vals = np.abs(rf_resultX.values).mean(0)
-
-    shap_importance = pd.DataFrame(
-        list(zip(feature_names, vals)), columns=["col_name", "feature_importance_vals"]
-    )
-
-    shap_importance.sort_values(
-        by=["feature_importance_vals"], ascending=False, inplace=True
-    )
-    shap_importance_dict = shap_importance.to_dict("records")
-
-    return shap_importance_dict
-
-
-@application.callback(
-    Output("bar_graph", "figure"),
-    Input("shap_importance_store", "data"),
-)
-@cache.memoize(timeout=TIMEOUT)
-def draw_shap_bar_graph(df):
-    df = pd.json_normalize(df)
-    fig = px.bar(
-        df[:5],
-        x="feature_importance_vals",
-        y="col_name",
-        orientation="h",
-        template="plotly_dark",
-    )
-    fig.update_traces(marker_color=theme["cyon"])
-    fig.update_layout(barmode="stack", yaxis={"categoryorder": "total ascending"})
-    # fig.update_traces(
-    #     marker_color=theme["primary"],
-    #     marker_line_color=theme["primary"],
-    #     marker_line_width=1.5,
-    #     opacity=0.6,
-    # )
-    return fig
-
-
-@application.callback(
-    Output("dependence_plot", "figure"),
-    Input("shap_values_store", "data"),
-)
-@cache.memoize(timeout=TIMEOUT)
-def draw_shap_dependence_graph(shap_values):
-    # shap_values = pd.json_normalize(shap_values)
-    shap_values = get_shap_values()
-    df = dataframe()
-    # print(shap_values[:, 12])
-    # Create figure with secondary y-axis
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-    # Add traces
-    fig.add_trace(
-        go.Scatter(
-            x=df["FW_Feed_B"],
-            y=shap_values[:, 11],
-            name="FW_Feed_B",
-            mode="markers",
-            marker=dict(size=3),
-        ),  # replace with your own data source
-        secondary_y=False,
-    )
-
-    # Add traces
-    fig.add_trace(
-        go.Scatter(
-            x=df["FW_Feed_B"],
-            y=df["Dig_A_Temp"],
-            name="Dig_A_Temp",  # replace with your own data source
-            mode="markers",
-            marker=dict(size=3),
-        ),
-        secondary_y=True,
-    )
-
-    # Add figure title
-    fig.update_layout(title_text="Dependence Plot")
-    fig.update_layout(template="plotly_dark")
-    # # Set x-axis title
-    # fig.update_xaxes(title_text="xaxis title")
-
-    # Set y-axes titles
-    fig.update_yaxes(title_text="SHAP Values of FW_Feed_B", secondary_y=False)
-
-    fig.update_yaxes(title_text="Dig_A_Temp", secondary_y=True)
-    fig.update_xaxes(
-        title_text="FW_Feed_B",
-    )
-
     return fig
 
 

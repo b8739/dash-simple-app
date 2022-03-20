@@ -39,7 +39,7 @@ def plotMonitoringGraphs(graph_type, graph_number):
                             "position": "absolute",
                             "zIndex": 1,
                             "top": 33,
-                            "left": 35,
+                            "left": 40,
                         },
                     ),
                     # html.Br(),
@@ -59,7 +59,7 @@ def plotMonitoringGraphs(graph_type, graph_number):
     return children
 
 
-tabs_styles = {"height": "44px", "align-items": "center"}
+tabs_styles = {"height": "44px", "alignItems": "center"}
 
 tab_style = {
     "fontWeight": "bold",
@@ -207,7 +207,7 @@ contents = dbc.Col(
                         style={
                             "paddingTop": 8,
                             "paddingRight": 10,
-                            "text-align": "right",
+                            "textAlign": "right",
                             # "marginTop": 15,
                             "marginBottom": 15,
                         },

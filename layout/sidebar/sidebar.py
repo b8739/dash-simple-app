@@ -7,6 +7,7 @@ from utils.constants import (
     iris_page_location,
     monitoring_location,
     modeling_location,
+    analysis_location,
 )
 
 
@@ -24,7 +25,7 @@ sidebar_header = dbc.Row(
                     # the navbar-toggler classes don't set color
                     style={
                         "color": "rgba(0,0,0,.5)",
-                        "border-color": "rgba(0,0,0,.1)",
+                        "borderColor": "rgba(0,0,0,.1)",
                     },
                     id="navbar-toggle",
                 ),
@@ -35,7 +36,7 @@ sidebar_header = dbc.Row(
                     # the navbar-toggler classes don't set color
                     style={
                         "color": "rgba(0,0,0,.5)",
-                        "border-color": "rgba(255,255,255,.1)",
+                        "borderColor": "rgba(255,255,255,.1)",
                     },
                     id="sidebar-toggle",
                 ),
@@ -76,6 +77,9 @@ sidebar = html.Div(
                     ),
                     dbc.NavLink(
                         "모델링 (Modeling)", href=modeling_location, active="exact"
+                    ),
+                    dbc.NavLink(
+                        "관계성 그래프 (Analysis)", href=analysis_location, active="exact"
                     ),
                 ],
                 vertical=True,

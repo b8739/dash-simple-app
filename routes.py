@@ -8,10 +8,12 @@ from utils.constants import (
     home_page_location,
     monitoring_location,
     modeling_location,
+    analysis_location,
 )
 
 from pages.monitoring import monitoring
 from pages.modeling import modeling
+from pages.analysis import analysis
 
 # from pages.iris import iris
 
@@ -24,6 +26,8 @@ def render_page_content(pathname):
         return monitoring.layout
     elif pathname == modeling_location:
         return modeling.layout
+    elif pathname == analysis_location:
+        return analysis.layout
     # elif pathname == iris_page_location:
     #     return iris.layout
     # If the user tries to reach a different page, return a 404 message

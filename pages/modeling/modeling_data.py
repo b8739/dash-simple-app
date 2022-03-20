@@ -56,7 +56,6 @@ def create_model(train_Xn, train_y):
 
 @cache.memoize(timeout=TIMEOUT)
 def get_modeling_result():
-    # print(verify())
 
     # 모델링 실행
     rep_prediction = {"value": math.inf}
@@ -112,7 +111,6 @@ def verify(veri_idx):
     scalerX.fit(initial_data()["train_x"])
 
     veri_Xn = scalerX.transform(veri_x)  # Scaling the verifying data
-    print(veri_Xn)
 
     model = create_model(initial_data()["train_Xn"], initial_data()["train_y"])
     xgb_veri_predict = model["xgb"].predict(

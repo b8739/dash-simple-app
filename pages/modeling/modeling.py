@@ -39,20 +39,25 @@ card = dbc.Card(
 layout = html.Div(
     [
         dbc.Row(
-            [
-                dbc.Col(
-                    html.Div(
-                        # card,
-                        style={
-                            "display": "flex",
-                            "align-items": "center",
-                            "justify-content": "space-around",
-                        },
-                    )
-                )
-                for _ in range(4)
-            ],
+            dbc.Col(
+                html.H5("Biogas 생산량 예측"),
+            )
         ),
+        # dbc.Row(
+        #     [
+        #         dbc.Col(
+        #             html.Div(
+        #                 # card,
+        #                 style={
+        #                     "display": "flex",
+        #                     "alignItems": "center",
+        #                     "justifyContent": "space-around",
+        #                 },
+        #             )
+        #         )
+        #         for _ in range(4)
+        #     ],
+        # ),
         dbc.Row(get_modeling_assessment(), id="model_assessment"),
         dbc.Row(
             dbc.Col(
@@ -93,18 +98,6 @@ layout = html.Div(
                         style={"height": "50vh", "width": "70vh"},
                     ),
                 ),
-                dbc.Col(
-                    dcc.Graph(
-                        id="bar_graph",
-                        style={"height": "50vh", "width": "70vh"},
-                    ),
-                ),
-                dbc.Col(
-                    dcc.Graph(
-                        id="dependence_plot",
-                        style={"height": "50vh", "width": "70vh"},
-                    ),
-                ),
             ]
         ),
         html.Br(),
@@ -112,14 +105,6 @@ layout = html.Div(
             [
                 dcc.Store(
                     id="actual_predict_store",
-                    storage_type="session",
-                ),
-                dcc.Store(
-                    id="shap_values_store",
-                    storage_type="session",
-                ),
-                dcc.Store(
-                    id="shap_importance_store",
                     storage_type="session",
                 ),
                 dcc.Store(
@@ -131,7 +116,7 @@ layout = html.Div(
                     storage_type="session",
                 ),
             ],
-            fullscreen=True,
+            # fullscreen=True,
             type="circle",
         ),
     ]
