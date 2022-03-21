@@ -1,6 +1,5 @@
 from dash.dependencies import Input, Output, State
 from pages.modeling.modeling_data import verify
-from utils.constants import df_end_idx
 from app import application
 
 
