@@ -11,6 +11,11 @@ from utils.constants import theme
 layout = html.Div(
     [
         dbc.Row(
+            dbc.Col(
+                html.H6("Biogas 안정적 운전값 제시"),
+            )
+        ),
+        dbc.Row(
             [
                 dbc.Col(
                     dcc.Graph(

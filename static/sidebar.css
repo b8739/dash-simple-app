@@ -30,12 +30,14 @@
 @media (min-width: 48em) {
   #sidebar {
     position: fixed;
-    top: 0;
+    top: 5%;
     left: 0;
     bottom: 0;
     width: 20rem;
     text-align: left;
     transition: margin 0.3s ease-in-out, padding 0.3s ease-in-out;
+    padding-left: 2.5%;
+    /* padding-right: 2.5%; */
   }
 
   #sidebar-toggle {
@@ -85,6 +87,7 @@
 
   /* set margins of the main content so that it doesn't overlap the sidebar */
   #page-content {
+    margin-top: 4rem;
     margin-left: 22rem;
     margin-right: 2rem;
     transition: margin-left 0.3s ease-in-out;

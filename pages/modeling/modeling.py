@@ -40,7 +40,7 @@ layout = html.Div(
     [
         dbc.Row(
             dbc.Col(
-                html.H5("Biogas 생산량 예측"),
+                html.H6("Biogas 생산량 예측"),
             )
         ),
         # dbc.Row(
@@ -64,22 +64,10 @@ layout = html.Div(
                 daq.LEDDisplay(
                     id="predict_value",
                     label="Predict Value",
-                    color="#f4d44d",
+                    labelPosition="bottom",
+                    color="#fcdc64",
                     size=24,
                     value=0,
-                ),
-                width=3,
-            )
-        ),
-        html.Br(),
-        dbc.Row(
-            dbc.Col(
-                dcc.Dropdown(
-                    id="predict_dropdown",
-                    options=[
-                        {"label": str(i) + "번째 데이터", "value": i} for i in range(1, 8)
-                    ],
-                    # value="sepal width (cm)",
                 ),
                 width=3,
             )
