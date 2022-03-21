@@ -16,3 +16,7 @@ button {
   fill: rgb(120, 120, 120) !important;
   /* fill:#121212 */
 }
+hr {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}

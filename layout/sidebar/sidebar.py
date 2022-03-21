@@ -88,10 +88,9 @@ sidebar = html.Div(
         #     ),
         #     id="collapse",
         # ),
-        """ TTC TEST""",
+        html.Hr(),
         html.Div(
             [
-                html.Hr(style={"marginTop": 0}),
                 html.P(
                     "데이터 불러오기 (For TTA)",
                     style={"color": "#fff"},
@@ -103,7 +102,7 @@ sidebar = html.Div(
         dbc.Row(
             dbc.Col(
                 dcc.Dropdown(
-                    id="predict_dropdown",
+                    id="veri_dropdown",
                     options=[
                         {"label": str(i) + "번째 데이터", "value": i} for i in range(1, 8)
                     ],
@@ -112,6 +111,10 @@ sidebar = html.Div(
                 # width=3,
             )
         ),
+                        dcc.Store(
+                    id="read_data_store",
+                    storage_type="session",
+                ),
     ],
     id="sidebar",
 )

@@ -15,35 +15,34 @@ layout = html.Div(
                 html.H6("Biogas 안정적 운전값 제시"),
             )
         ),
-        dbc.Row(
-            [
-                dbc.Col(
-                    dcc.Graph(
-                        id="bar_graph",
-                        style={"height": "50vh", "width": "70vh"},
+        html.Hr(),
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                dcc.Graph(
+                                    id="bar_graph",
+                                    style={"height": "40vh"},
+                                ),
+                            ),
+                        ]
                     ),
-                ),
-                # dbc.Col(
-                #     dcc.Graph(
-                #         id="dependence_plot",
-                #         style={"height": "50vh", "width": "70vh"},
-                #     ),
-                # ),
-            ]
+                ]
+            ),
+            className="mt-3",
         ),
-        html.Div(
-            # [
-            #     dbc.Col(
-            #         dcc.Graph(
-            #             id={"type": "dependence_plot", "index": idx}
-            #             # style={"height": "50vh", "width": "70vh"},
-            #         ),
-            #         width=3,
-            #     )
-            #     for idx in range(4)
-            # ]
-            id="dependence_container",
-            children=[],
+        dbc.Card(
+            dbc.CardBody(
+                [
+                    html.Div(
+                        id="dependence_container",
+                        children=[],
+                    ),
+                ]
+            ),
+            className="mt-3",
         ),
         dcc.Loading(
             [

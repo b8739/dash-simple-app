@@ -8,11 +8,11 @@ from layout.navbar.navbar_callbacks import toggle_navbar_collapse
 
 from pages.monitoring.monitoring_callbacks import changeTag
 
-# from pages.analysis.analysis_callbacks import (
-#     get_shap_importance,
-#     draw_shap_bar_graph,
-#     # draw_shap_dependence_graph,
-# )
+from pages.analysis.analysis_callbacks import (
+    get_shap_importance,
+    draw_shap_bar_graph,
+    # draw_shap_dependence_graph,
+)
 
 from pages.modeling.modeling_callbacks import (
     draw_actual_predict_graph,

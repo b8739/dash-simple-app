@@ -75,19 +75,10 @@ def draw_actual_predict_graph(df):
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
+            # "font": {"size": 10},
         }
     )
 
     fig.update_layout(template="plotly_dark")
     print("Actual Predictive 그래프 그리기 완료")
     return fig
-
-
-@application.callback(
-    Output("predict_value", "value"),
-    Input("predict_dropdown", "value"),
-    prevent_initial_call=True,
-)
-def update_predict_value(data_idx):
-    prediction = verify(int(data_idx) - 1)
-    return prediction

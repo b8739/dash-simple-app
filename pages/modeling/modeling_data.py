@@ -79,8 +79,8 @@ def get_modeling_result():
 @cache.memoize(timeout=TIMEOUT)
 def get_modeling_assessment():
     rep_prediction = get_modeling_result()
-    # assessment = ["MAPE_Value", "R_square_XGB", "RMSE"]
-    assessment = ["MAPE_Value", "RMSE"]
+    assessment = ["MAPE_Value", "R_square_XGB", "RMSE"]
+    # assessment = ["MAPE_Value", "RMSE"]
     print("Modeling 평가 결과 저장 완료")
     return [
         dbc.Col(
@@ -90,9 +90,9 @@ def get_modeling_assessment():
                 labelPosition="bottom",
                 value=round(rep_prediction[i], 3),
                 color="#fcdc64",
-                size=24,
+                size=18,
             ),
-            width=3,
+            # width=3,
         )
         for i in assessment
     ]

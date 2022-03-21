@@ -21,7 +21,7 @@ def plotMonitoringGraphs(graph_type, graph_number):
         dcc.Graph(
             figure=biggas_data(),
             id="biggas_graph",
-            style={"height": "25vh"},
+            style={"height": "23vh"},
         )
     ]
     for idx in range(graph_number):

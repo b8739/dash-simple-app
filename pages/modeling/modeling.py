@@ -16,25 +16,15 @@ from utils.constants import theme
 
 algorithm_list = ["XGBoost", "SVR", "LSTM", "Ensemble"]
 
+table_header = [html.Thead(html.Tr([html.Th("First Name"), html.Th("Last Name")]))]
+row1 = html.Tr([html.Td("Arthur"), html.Td("Dent")])
+row2 = html.Tr([html.Td("Ford"), html.Td("Prefect")])
+row3 = html.Tr([html.Td("Zaphod"), html.Td("Beeblebrox")])
+row4 = html.Tr([html.Td("Trillian"), html.Td("Astra")])
 
-# Card
-
-card = dbc.Card(
-    dbc.CardBody(
-        [
-            html.Label("88%", id="MAPE", className="card-title"),
-            html.H6("MAPE", className="card-subtitle"),
-        ]
-    ),
-    inverse=True,
-    style={
-        "width": "10rem",
-    },
-    id="card",
-)
-
-
+table_body = [html.Tbody([row1, row2, row3, row4])]
 # Layout
+
 
 layout = html.Div(
     [
@@ -43,34 +33,58 @@ layout = html.Div(
                 html.H6("Biogas 생산량 예측"),
             )
         ),
-        # dbc.Row(
-        #     [
-        #         dbc.Col(
-        #             html.Div(
-        #                 # card,
-        #                 style={
-        #                     "display": "flex",
-        #                     "alignItems": "center",
-        #                     "justifyContent": "space-around",
-        #                 },
-        #             )
-        #         )
-        #         for _ in range(4)
-        #     ],
-        # ),
-        dbc.Row(get_modeling_assessment(), id="model_assessment"),
+        html.Hr(),
         dbc.Row(
-            dbc.Col(
-                daq.LEDDisplay(
-                    id="predict_value",
-                    label="Predict Value",
-                    labelPosition="bottom",
-                    color="#fcdc64",
-                    size=24,
-                    value=0,
-                ),
-                width=3,
-            )
+            [
+                dbc.CardGroup(
+                    [
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.H6("대표 알고리즘", className="card-title"),
+                                    html.H6(
+                                        "XGBoost",
+                                        style={
+                                            "textAlign": "center",
+                                            "fontWeight": "bold",
+                                        },
+                                    ),
+                                ]
+                            ),
+                            className="mt-3",
+                        ),
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.H6("모델 성능", className="card-title"),
+                                    dbc.Row(
+                                        get_modeling_assessment(),
+                                        id="model_assessment",
+                                        justify="center",
+                                    ),
+                                ]
+                            ),
+                            className="mt-3",
+                        ),
+                        dbc.Card(
+                            dbc.CardBody(
+                                [
+                                    html.H6("모델 예측값", className="card-title"),
+                                    daq.LEDDisplay(
+                                        id="predict_value",
+                                        label="Predict Value",
+                                        labelPosition="bottom",
+                                        color="#fcdc64",
+                                        size=18,
+                                        value=0,
+                                    ),
+                                ]
+                            ),
+                            className="mt-3",
+                        ),
+                    ]
+                )
+            ]
         ),
         html.Br(),
         dbc.Row(
@@ -83,8 +97,22 @@ layout = html.Div(
                 dbc.Col(
                     dcc.Graph(
                         id="line_graph",
-                        style={"height": "50vh", "width": "70vh"},
+                        # style={"height": "50vh", "width": "70vh"},
+                        style={"height": "45vh"},
                     ),
+                    width=12,
+                ),
+                html.Br(),
+                dbc.Col(
+                    dbc.Table(
+                        # using the same table as in the above example
+                        table_header + table_body,
+                        bordered=True,
+                        dark=True,
+                        hover=True,
+                        responsive=True,
+                        striped=True,
+                    )
                 ),
             ]
         ),

@@ -114,7 +114,17 @@ def biggas_data():
     " " " Quantile 표시 " " "
     quantile_info = get_quantile_biogas("Biogas_prod")
     # q_position = df[tag].min() * 1.1
-
+    fig.add_annotation(
+        text="Avg " + get_avg(tag),
+        align="left",
+        showarrow=False,
+        xref="paper",
+        yref="paper",
+        x=1.05,
+        y=1.1,
+        bordercolor="black",
+        borderwidth=1,
+    )
     for q in ["Q1", "Q3"]:
         # q_position += df[tag].max() / 4
 

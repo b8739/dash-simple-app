@@ -1,5 +1,6 @@
 monitored_tags = ["PS_incoming", "FW_Feed_A", "Dig_A_Temp", "Dig_Feed_A"]
 
+df_end_idx = 0
 algorithm_type = ["xgb", "rf", "svr"]
 
 theme = {

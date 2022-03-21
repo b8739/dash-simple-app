@@ -86,7 +86,15 @@ def draw_shap_bar_graph(df):
         title_text="Feature Importance",
     )
     fig.update_layout(barmode="stack", yaxis={"categoryorder": "total ascending"})
-    fig.update_layout(title_text="주요 변수 영향도")
+    fig.update_layout(
+        title={
+            "text": "주요 변수 영향도",
+            # "y": 0.9,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+        }
+    )
 
     return fig
 
@@ -100,8 +108,18 @@ def get_dependence_plot(df, col):
         template="plotly_dark",
     )
     fig.update_traces(
-        mode="markers", marker=dict(size=2, line=dict(width=2, color="#f4d44d"))
+        mode="markers", marker=dict(size=0.5, line=dict(width=2, color="#f4d44d"))
     ),
+    fig.update_layout(
+        title={
+            "text": "관계성 그래프 (" + col + ")",
+            # "y": 0.9,
+            "x": 0.5,
+            "xanchor": "center",
+            "yanchor": "top",
+        }
+    )
+
     return fig
 
 
@@ -124,6 +142,7 @@ def draw_dependence_plot(shap_df, div_container):
                 dcc.Graph(
                     id={"type": "dependence_plot", "index": idx},
                     figure=get_dependence_plot(df, col),
+                    style={"height": "35vh"},
                 ),
                 width=3,
             )
