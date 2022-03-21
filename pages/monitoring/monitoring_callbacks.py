@@ -62,17 +62,18 @@ def changeTag(tag):
     fig.update_layout(
         yaxis_title=None,
         xaxis_title="Date",
-        title={
-            "text": tag,
-            "xref": "paper",
-            "yref": "paper",
-            "x": 0.5,
-            # "pad": {"b": 50},
-            "xanchor": "center",
-            "yanchor": "middle",
-            "font": {"size": 15}
-            # "y": 0.5,
-        },
+        # updatemenus와 곂치기 때문에 none
+        # title={
+        #     "text": tag,
+        #     "xref": "paper",
+        #     "yref": "paper",
+        #     "x": 0.5,
+        #     # "pad": {"b": 50},
+        #     "xanchor": "center",
+        #     "yanchor": "middle",
+        #     "font": {"size": 15}
+        #     # "y": 0.5,
+        # },
         margin=dict(l=70, r=70, t=70, b=90, pad=20),
         # pad=dict(l=100, r=100, t=30, b=100),
     )
@@ -118,14 +119,15 @@ def changeTag(tag):
                             args=[
                                 {"y": [df[col]]},
                                 {
-                                    "title": {
-                                        "text": col,
-                                        "font": {"size": 15},
-                                        "xref": "paper",
-                                        "x": 0.5,
-                                        "xanchor": "center",
-                                        "yanchor": "middle",
-                                    },
+                                    # updatemenus와 곂치기 때문에 none
+                                    # "title": {
+                                    #     "text": col,
+                                    #     "font": {"size": 15},
+                                    #     "xref": "paper",
+                                    #     "x": 0.5,
+                                    #     "xanchor": "center",
+                                    #     "yanchor": "middle",
+                                    # },
                                     "yaxis": {
                                         "range": [
                                             min(df[col]) - 0.2 * min(df[col]),
@@ -184,8 +186,8 @@ def changeTag(tag):
                 pad={"r": 10, "t": 10},
                 showactive=True,
                 font=dict(size=15),
-                x=0.5,
-                y=1.6,
+                x=0.55,
+                y=1.8,
                 xanchor="center",
                 yanchor="top",
                 bordercolor="white",
