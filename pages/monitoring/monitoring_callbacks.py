@@ -187,7 +187,7 @@ def changeTag(tag):
                 showactive=True,
                 font=dict(size=15),
                 x=0.55,
-                y=1.8,
+                y=1.8,  # 내릴수록 내려감
                 xanchor="center",
                 yanchor="top",
                 bordercolor="white",
