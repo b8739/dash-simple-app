@@ -1,7 +1,6 @@
 from dash.dependencies import Output, Input, State, ALL, MATCH, ALLSMALLER
 import pandas as pd
 import plotly.express as px
-from pages.modeling.modeling_data import get_modeling_result, initial_data, verify
 from app import application
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
 from dash import Dash, dcc, html, Input, Output, callback, dash_table
@@ -15,7 +14,7 @@ from app import cache
 from utils.constants import TIMEOUT
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-from logic.prepare_data import dataframe
+from logic.prepare_data import to_dataframe
 from utils.constants import theme
 
 
@@ -23,9 +22,9 @@ from utils.constants import theme
 
 
 @cache.memoize(timeout=TIMEOUT)
-def get_shap_values():
-    train_x = initial_data()["train_x"]
-    train_y = initial_data()["train_y"]
+def get_shap_values(initial_store):
+    train_x = initial_store["train_x"]
+    train_y = initial_store["train_y"]
     model = XGBRegressor()
     model.fit(train_x, train_y)
 
@@ -37,12 +36,13 @@ def get_shap_values():
 @application.callback(
     Output("shap_importance_store", "data"),
     Input("btn_4", "n_clicks"),
+    State("initial_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def get_shap_importance(n_clicks):
-    train_x = initial_data()["train_x"]
+def get_shap_importance(n_clicks, initial_store):
+    train_x = initial_store["train_x"]
 
-    shap_values = get_shap_values()
+    shap_values = get_shap_values(initial_store)
     feature_names = train_x.columns
 
     rf_resultX = pd.DataFrame(shap_values, columns=feature_names)
@@ -126,11 +126,12 @@ def get_dependence_plot(df, col):
 @application.callback(
     Output("dependence_container", "children"),
     [Input("shap_importance_store", "data")],
+    [State("df_store", "data")],
     [State("dependence_container", "children")],
 )
 @cache.memoize(timeout=TIMEOUT)
-def draw_dependence_plot(shap_df, div_container):
-    df = dataframe()
+def draw_dependence_plot(shap_df, df_dict, div_container):
+    df = to_dataframe(df_dict)
     shap_df = pd.json_normalize(shap_df)
     top_5_cols = shap_df["col_name"][:4]
     # print(shap_values[:, 12])
@@ -162,7 +163,7 @@ def draw_dependence_plot(shap_df, div_container):
 # def draw_shap_dependence_graph(shap_values):
 #     # shap_values = pd.json_normalize(shap_values)
 #     shap_values = get_shap_values()
-#     df = dataframe()
+#     df = to_dataframe()
 #     # print(shap_values[:, 12])
 #     # Create figure with secondary y-axis
 #     fig = make_subplots(specs=[[{"secondary_y": True}]])

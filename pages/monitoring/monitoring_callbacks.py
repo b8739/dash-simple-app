@@ -1,7 +1,7 @@
 from dash.dependencies import Output, Input, State, ALL, MATCH, ALLSMALLER
 import pandas as pd
 import plotly.express as px
-from logic.prepare_data import dataframe, get_quantile, get_avg
+from logic.prepare_data import to_dataframe
 from utils.constants import monitored_tags
 from app import application
 
@@ -9,9 +9,9 @@ from app import cache
 from utils.constants import TIMEOUT
 
 
-def make_avg_annotation(tag):
+def make_avg_annotation(avg):
     return dict(
-        text="Avg: " + get_avg(tag),
+        text="Avg: " + str(avg),
         align="left",
         showarrow=False,
         xref="paper",
@@ -39,11 +39,15 @@ def make_quantile_annotation(name, y_pos):
 @application.callback(
     Output({"type": "monitoring-graph", "index": MATCH}, "figure"),
     Input({"type": "tagDropdown", "index": MATCH}, "value"),
+    State("df_store", "data"),
+    State("avg_store", "data"),
+    State("quantile_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def changeTag(tag):
+def changeTag(tag, df_dict, avg_store, quantile_store):
     " " " Plotly Graph 생성 " " "
-    df = dataframe()
+    df = to_dataframe(df_dict)
+
     df = df.iloc[len(df) - 100 : 1022]
 
     if not tag:
@@ -78,7 +82,7 @@ def changeTag(tag):
         # pad=dict(l=100, r=100, t=30, b=100),
     )
     " " " Quantile 표시 " " "
-    quantile_info = get_quantile(*df.columns)
+
     # q_position = df[tag].min() * 1.1
 
     for q in [
@@ -88,7 +92,7 @@ def changeTag(tag):
         # q_position += df[tag].max() / 4
 
         fig.add_hline(
-            y=quantile_info[tag][q],
+            y=quantile_store[tag][q],
             line_dash="dot",
             line_color="orange",
             annotation_text=q,
@@ -99,7 +103,7 @@ def changeTag(tag):
     " " " Average 표시 " " "
 
     fig.add_annotation(
-        text="Avg: " + get_avg(tag),
+        text="Avg: " + str(avg_store[tag]),
         align="left",
         showarrow=False,
         xref="paper",
@@ -135,21 +139,21 @@ def changeTag(tag):
                                         ]
                                     },
                                     "annotations": [
-                                        make_avg_annotation(col),
+                                        make_avg_annotation(avg_store[col]),
                                         make_quantile_annotation(
-                                            "Q1", quantile_info[col]["Q1"]
+                                            "Q1", quantile_store[col]["Q1"]
                                         ),
                                         make_quantile_annotation(
-                                            "Q3", quantile_info[col]["Q3"]
+                                            "Q3", quantile_store[col]["Q3"]
                                         ),
                                     ],
                                     "shapes": [
                                         {
                                             "type": "line",
                                             "x0": 0,
-                                            "y0": quantile_info[col]["Q1"],
+                                            "y0": quantile_store[col]["Q1"],
                                             "x1": 1,
-                                            "y1": quantile_info[col]["Q1"],
+                                            "y1": quantile_store[col]["Q1"],
                                             "xref": "paper",
                                             "yref": "y",
                                             "line": {
@@ -161,9 +165,9 @@ def changeTag(tag):
                                         {
                                             "type": "line",
                                             "x0": 0,
-                                            "y0": quantile_info[col]["Q3"],
+                                            "y0": quantile_store[col]["Q3"],
                                             "x1": 1,
-                                            "y1": quantile_info[col]["Q3"],
+                                            "y1": quantile_store[col]["Q3"],
                                             "xref": "paper",
                                             "yref": "y",
                                             "line": {

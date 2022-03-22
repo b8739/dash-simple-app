@@ -9,11 +9,11 @@ from layout.layout import layout
 import flask
 import dash_daq as daq
 from utils.constants import theme
-
+from dash_extensions.enrich import Dash, Trigger, ServersideOutput
 
 server = flask.Flask(__name__)  # define flask app.server
-
-application = dash.Dash(
+# serversdieoutput사용하려고 dash로 변경
+application = Dash(
     __name__,
     server=server,
     suppress_callback_exceptions=True,

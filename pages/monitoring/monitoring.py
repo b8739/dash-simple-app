@@ -5,8 +5,6 @@ import dash_bootstrap_components as dbc
 import dash_daq as daq
 from utils.constants import monitored_tags, theme
 
-from logic.prepare_data import biggas_data
-
 
 def isNormal(idx):
     if idx == 1:
@@ -19,7 +17,7 @@ def isNormal(idx):
 def plotMonitoringGraphs(graph_type, graph_number):
     children = [
         dcc.Graph(
-            figure=biggas_data(),
+            # figure=biggas_data(),
             id="biggas_graph",
             style={"height": "23vh"},
         )
@@ -198,7 +196,8 @@ contents = dbc.Col(
                             ),
                             daq.Indicator(
                                 id="indicator2",
-                                color="red",
+                                color="rgba(255, 0, 0, 0.1)",
+                                # color="grey",
                                 value="Abnormal",
                                 className="dark-theme-control",
                                 style={"display": "inline-block"},

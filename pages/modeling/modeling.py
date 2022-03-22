@@ -10,7 +10,6 @@ from dash.dependencies import Output, ALL, State, MATCH, ALLSMALLER
 import plotly.express as px
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
 import dash_daq as daq
-from pages.modeling.modeling_data import get_modeling_assessment
 from utils.constants import theme
 
 
@@ -58,9 +57,24 @@ layout = html.Div(
                                 [
                                     html.H6("모델 성능", className="card-title"),
                                     dbc.Row(
-                                        get_modeling_assessment(),
-                                        id="model_assessment",
-                                        justify="center",
+                                        [
+                                            dbc.Col(
+                                                daq.LEDDisplay(
+                                                    id=i,
+                                                    label=i,
+                                                    labelPosition="bottom",
+                                                    value=0,
+                                                    color="#fcdc64",
+                                                    size=18,
+                                                ),
+                                                # width=3,
+                                            )
+                                            for i in [
+                                                "MAPE_Value",
+                                                "R_square_XGB",
+                                                "RMSE",
+                                            ]
+                                        ]
                                     ),
                                 ]
                             ),

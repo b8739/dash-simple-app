@@ -5,7 +5,7 @@ span,
 p,
 label,
 button {
-  color: #fff !important;
+  color: #fff;
 }
 .updatemenu-item-rect {
   /* fill: #000 !important; */
