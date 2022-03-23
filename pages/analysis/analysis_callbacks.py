@@ -55,9 +55,12 @@ def get_shap_importance(n_clicks, initial_store):
     shap_importance.sort_values(
         by=["feature_importance_vals"], ascending=False, inplace=True
     )
-    # shap_importance["feature_importance_vals"] = shap_importance[
-    #     "feature_importance_vals"
-    # ].round(decimals=2) #round가 왠지 모르지만 작동안함
+    shap_importance["feature_importance_vals"] = shap_importance[
+        "feature_importance_vals"
+    ].round(
+        decimals=2
+    )  # round가 왠지 모르지만 작동안함
+
     shap_importance_dict = shap_importance.to_dict("records")
 
     return shap_importance_dict

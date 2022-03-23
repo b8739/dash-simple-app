@@ -38,13 +38,18 @@ def make_quantile_annotation(name, y_pos):
 
 @application.callback(
     Output({"type": "monitoring-graph", "index": MATCH}, "figure"),
-    Input({"type": "tagDropdown", "index": MATCH}, "value"),
+    Input("quantile_store", "data"),
+    State({"type": "tagDropdown", "index": MATCH}, "value"),
     State("df_store", "data"),
     State("avg_store", "data"),
-    State("quantile_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def changeTag(tag, df_dict, avg_store, quantile_store):
+def changeTag(
+    quantile_store,
+    tag,
+    df_dict,
+    avg_store,
+):
     " " " Plotly Graph 생성 " " "
     df = to_dataframe(df_dict)
 
@@ -52,7 +57,8 @@ def changeTag(tag, df_dict, avg_store, quantile_store):
 
     if not tag:
         tag = df.columns[3]
-    fig = px.scatter(df, x="date", y=tag, title=None, template="plotly_dark")
+    # fig = px.scatter(df, x="date", y=tag, title=None, template="plotly_dark")
+    fig = px.line(df, x="date", y=tag, title=None, template="plotly_dark", markers=True)
 
     fig.update_traces(
         mode="markers", marker=dict(size=2, line=dict(width=2, color="#f4d44d"))
@@ -93,11 +99,12 @@ def changeTag(tag, df_dict, avg_store, quantile_store):
 
         fig.add_hline(
             y=quantile_store[tag][q],
-            line_dash="dot",
-            line_color="orange",
+            # line_dash="dot",
+            line_color="white",
+            # line_width=0.5,
             annotation_text=q,
             annotation_position="right",
-            opacity=0.9,
+            opacity=0.7,
         )
 
     " " " Average 표시 " " "

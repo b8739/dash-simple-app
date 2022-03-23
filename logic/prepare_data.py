@@ -131,12 +131,12 @@ def get_quantile(df_dict):
 
 @application.callback(
     Output("biggas_graph", "figure"),
-    Input("df_store", "data"),
-    State("quantile_store", "data"),
+    Input("quantile_store", "data"),
+    State("df_store", "data"),
     State("avg_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def biggas_data(df_dict, quantile_store, avg_store):
+def biggas_data(quantile_store, df_dict, avg_store):
     df = to_dataframe(df_dict)
     df = df.iloc[len(df) - 100 : 1022]
     tag = "Biogas_prod"
