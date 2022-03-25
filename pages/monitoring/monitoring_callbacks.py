@@ -61,7 +61,6 @@ def changeTag(
     if not tag:
         tag = df.columns[3]
     # fig = px.scatter(df, x="date", y=tag, title=None, template="plotly_dark")
-    print("tag: ", tag)
     try:
         fig = px.line(df, x="date", y=tag, title=None, markers=True)
     except Exception:
@@ -168,31 +167,19 @@ def changeTag(
                                             {
                                                 "type": "line",
                                                 "x0": 0,
-                                                "y0": quantile_store[col]["Q1"],
+                                                "y0": quantile_store[col][i],
                                                 "x1": 1,
-                                                "y1": quantile_store[col]["Q1"],
+                                                "y1": quantile_store[col][i],
                                                 "xref": "paper",
                                                 "yref": "y",
                                                 "line": {
-                                                    "color": "orange",
+                                                    "color": "white",
                                                     "width": 1,
-                                                    "dash": "dot",
+                                                    # "dash": "dot",
                                                 },
-                                            },
-                                            {
-                                                "type": "line",
-                                                "x0": 0,
-                                                "y0": quantile_store[col]["Q3"],
-                                                "x1": 1,
-                                                "y1": quantile_store[col]["Q3"],
-                                                "xref": "paper",
-                                                "yref": "y",
-                                                "line": {
-                                                    "color": "orange",
-                                                    "width": 1,
-                                                    "dash": "dot",
-                                                },
-                                            },
+                                                "opacity": 0.55,
+                                            }
+                                            for i in ["Q1", "Q3"]
                                         ],
                                     },
                                 ],

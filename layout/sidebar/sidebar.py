@@ -109,6 +109,7 @@ sidebar = html.Div(
                     options=[
                         {"label": str(i) + "번째 데이터", "value": i} for i in range(1, 8)
                     ],
+                    # persistence=True,
                     style={"backgroundColor": "rgb(48, 48, 48)"},
                     # value="sepal width (cm)",
                 )

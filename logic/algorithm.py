@@ -84,5 +84,4 @@ def get_actual_predictive(x1, y_act, y_pred):
     result.columns = ["date", "Actual", "Predictive"]
     result = result.sort_values(by=["date"], axis=0, ascending=True)
     # result = result.set_index("date")
-    print(result)
     return result

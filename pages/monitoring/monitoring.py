@@ -3,9 +3,8 @@ import dash_html_components as html
 
 import dash_bootstrap_components as dbc
 import dash_daq as daq
-import plotly.graph_objs as go
 
-from utils.constants import monitored_tags, theme
+from utils.constants import monitored_tags, theme, blank_figure
 import plotly.express as px
 
 
@@ -15,12 +14,6 @@ def isNormal(idx):
         return {"state": "Abnormal", "color": "red"}
     else:
         return {"state": "Normal", "color": theme["primary"]}
-
-
-def blank_figure():
-    fig = go.Figure(go.Scatter(x=[], y=[]))
-    fig.update_layout(template="plotly_dark")
-    return fig
 
 
 def plotMonitoringGraphs(graph_type, graph_number):
@@ -162,8 +155,7 @@ contents = dbc.Col(
                 [
                     dbc.Col(
                         [
-                            html.H6("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
-                            html.Br(),
+                            html.H5("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
                         ]
                     ),
                     # Normal
@@ -213,6 +205,7 @@ contents = dbc.Col(
                         },
                         width=4,
                     ),
+                    html.Hr(),
                     dropdowns,
                     dbc.Col(
                         graphs,

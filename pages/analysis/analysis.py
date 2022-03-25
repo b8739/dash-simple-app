@@ -5,14 +5,16 @@ from dash import Dash, dcc, html, Input, Output, callback, dash_table
 from dash.dependencies import Output, ALL, State, MATCH, ALLSMALLER
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
 import dash_daq as daq
-from utils.constants import theme
+from utils.constants import theme, blank_figure
 
 
 layout = html.Div(
     [
         dbc.Row(
             dbc.Col(
-                html.H6("Biogas 안정적 운전값 제시"),
+                [
+                    html.H5("Biogas 안정적 운전값 제시"),
+                ]
             )
         ),
         html.Hr(),
@@ -24,6 +26,7 @@ layout = html.Div(
                             dbc.Col(
                                 dcc.Graph(
                                     id="bar_graph",
+                                    figure=blank_figure(),
                                     style={"height": "40vh"},
                                 ),
                             ),

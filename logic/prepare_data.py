@@ -26,35 +26,9 @@ def to_dataframe(dictData):
     return pd.json_normalize(dictData)
 
 
-""" TRAIN TEST DATASET """
-
-
-@application.callback(
-    ServersideOutput("df_store", "data"),
-    [Input("veri_dropdown", "value")],
-)
-@cache.memoize(timeout=TIMEOUT)
-def preprocess_dataset(veri_dropdown):
-    idx_upto = 0
-    if not veri_dropdown:
-        idx_upto = 0
-    else:
-        idx_upto = veri_dropdown
-    df = excel_to_df()
-
-    df.rename(
-        columns={"Date": "date"}, inplace=True
-    )  # Change column name from 'Date' to 'date'
-
-    df.dtypes  # Find data types
-
-    df["date"] = pd.to_datetime(
-        df["date"]
-    )  # Change data type from 'object' to 'datetime'
-    df = df.iloc[0 : 1022 + idx_upto, :].copy()  # Train & Test data set
-
-    df.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
-
+def preprocess(df):
+    df.rename(columns={"Date": "date"}, inplace=True)
+    df["date"] = pd.to_datetime(df["date"])
     return df
 
 
@@ -62,13 +36,46 @@ def preprocess_dataset(veri_dropdown):
 # 아직 veri idx를 어떻게 받아서 처리할지 반영 안함
 @application.callback(
     ServersideOutput("df_veri_store", "data"),
-    Input("df_store", "data"),
+    Trigger("btn_3", "n_clicks"),
 )
-def extract_veri(df_store):
+def extract_veri():
     df = excel_to_df()
-
-    df_veri = df.iloc[1022:1029, :].copy()  # Data for Verifying (TTA Test)
+    df = preprocess(df)
+    df_veri = df.iloc[
+        1022:1029:,
+    ].copy()  # Data for Verifying (TTA Test)
     return df_veri
+
+
+""" TRAIN TEST DATASET """
+
+
+@application.callback(
+    ServersideOutput("df_store", "data"),
+    [Input("veri_dropdown", "value")],
+    [State("df_store", "data")],
+    [State("df_veri_store", "data")],
+)
+@cache.memoize(timeout=TIMEOUT)
+def extract_train_test(dropdown_value, df_store, df_veri_store):
+    # Read Rows upto Index of Verification Data
+    print("dropdown_value", dropdown_value)
+    if dropdown_value == 0 or not dropdown_value:
+
+        # Read Dataframe
+        df = excel_to_df()
+
+        # Preprocess
+        df = preprocess(df)
+        # df = df.iloc[:1022].copy()
+        df = df.iloc[:1022].copy()
+        df.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
+        return df
+    else:
+        new_df = pd.concat(
+            [df_store, df_veri_store[:dropdown_value]], ignore_index=True
+        )
+        return new_df
 
 
 """ AVG_STORE """
@@ -167,7 +174,7 @@ def biggas_data(quantile_store, df, avg_store):
             showarrow=False,
             xref="paper",
             yref="paper",
-            x=1.05,
+            x=1.02,
             y=1.1,
             bordercolor="black",
             borderwidth=1,

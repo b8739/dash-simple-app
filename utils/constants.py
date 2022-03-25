@@ -1,3 +1,5 @@
+import plotly.graph_objs as go
+
 monitored_tags = ["PS_incoming", "FW_Feed_A", "Dig_A_Temp", "Dig_Feed_A"]
 
 
@@ -10,6 +12,11 @@ theme = {
     "secondary": "#6E6E6E",
     "cyon": "#00bc8c",
 }
+
+def blank_figure():
+    fig = go.Figure(go.Scatter(x=[], y=[]))
+    fig.update_layout(template="plotly_dark")
+    return fig
 
 
 home_page_location = "/"

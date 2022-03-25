@@ -2,6 +2,7 @@ from dash.dependencies import Output, Input, State, ALL, MATCH, ALLSMALLER
 import pandas as pd
 import plotly.express as px
 from app import application
+import time
 
 import plotly.graph_objs as go
 import math
@@ -137,7 +138,6 @@ def get_modeling_result(model_store, initial_store):
         #     rep_prediction = result
         if i == "xgb":
             rep_prediction = result
-    print("Modeling 실행 완료")
 
     return rep_prediction
 
@@ -165,6 +165,17 @@ def get_modeling_result(model_store, initial_store):
 #         )
 #         for i in assessment
 #     ]
+
+
+# @application.callback(
+#     Output("loading-output-1", "children"),
+#     Input("veri_dropdown", "value"),
+#     State("modeling_result_store", "data"),
+# )
+# def input_triggers_spinner(value, modeling_result_store):
+#     print(modeling_result_store)
+#     time.sleep(5)
+#     return value
 
 
 """ Assessment"""
@@ -204,12 +215,12 @@ for i in ["MAPE_Value", "RMSE"]:
 @cache.memoize(timeout=TIMEOUT)
 def update_predict_value(data_idx, df_veri, initial_store, model_store):
     if not data_idx:
-        raise PreventUpdate
+        return 28485
     veri_idx = int(data_idx) - 1
     df_veri.reset_index(drop=True, inplace=True)
 
     veri_x = df_veri.drop(
-        ["Date", "Biogas_prod"], axis=1
+        ["date", "Biogas_prod"], axis=1
     )  # Take All the columns except 'Biogas_prod'
     veri_y = df_veri["Biogas_prod"]
 
@@ -221,6 +232,8 @@ def update_predict_value(data_idx, df_veri, initial_store, model_store):
 
     model = model_store
     xgb_veri_predict = model["xgb"].predict(veri_Xn[veri_idx].reshape(-1, 26))
+    xgb_veri_predict = xgb_veri_predict.round(0)
+
     # Results
     print("XGB_Pred = ", xgb_veri_predict)
     # print("RF_Pred = ", rf_veri_predict)
@@ -261,7 +274,6 @@ def save_actual_predictive_df(modeling_result_store, initial_store):
 )
 @cache.memoize(timeout=TIMEOUT)
 def draw_actual_predict_graph(df):
-    print("draw_actual_predict_graph")
     df = pd.json_normalize(df)
     trace_list = [
         go.Scatter(
@@ -300,5 +312,4 @@ def draw_actual_predict_graph(df):
     )
 
     fig.update_layout(template="plotly_dark")
-    print("Actual Predictive 그래프 그리기 완료")
     return fig

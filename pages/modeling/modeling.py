@@ -10,7 +10,7 @@ from dash.dependencies import Output, ALL, State, MATCH, ALLSMALLER
 import plotly.express as px
 import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-components
 import dash_daq as daq
-from utils.constants import theme
+from utils.constants import theme, blank_figure
 
 
 algorithm_list = ["XGBoost", "SVR", "LSTM", "Ensemble"]
@@ -29,35 +29,38 @@ layout = html.Div(
     [
         dbc.Row(
             dbc.Col(
-                html.H6("Biogas 생산량 예측"),
+                html.H5("Biogas 생산량 예측"),
             )
         ),
         html.Hr(),
         dbc.Row(
             [
-                dbc.CardGroup(
+                dbc.Col(
                     [
                         dbc.Card(
                             dbc.CardBody(
                                 [
-                                    html.H6("대표 알고리즘", className="card-title"),
                                     html.H6(
-                                        "XGBoost",
-                                        style={
-                                            "textAlign": "center",
-                                            "fontWeight": "bold",
-                                        },
+                                        "모델 예측값",
                                     ),
-                                ]
-                            ),
-                            className="mt-3",
-                        ),
-                        dbc.Card(
-                            dbc.CardBody(
-                                [
-                                    html.H6("모델 성능", className="card-title"),
+                                    daq.LEDDisplay(
+                                        id="predict_value",
+                                        value=28485,
+                                        label="Predict Value",
+                                        labelPosition="bottom",
+                                        color="#fcdc64",
+                                        size=40,
+                                    ),
+                                    html.H6(
+                                        "모델 성능",
+                                    ),
                                     dcc.Loading(
                                         children=[
+                                            # Loading 화면 띄우려고 끼워놓은것
+                                            # html.Div(
+                                            #     children=[html.P("hi")],
+                                            #     id="loading-output-1",
+                                            # ),
                                             dbc.Row(
                                                 [
                                                     dbc.Col(
@@ -66,8 +69,9 @@ layout = html.Div(
                                                             label=i,
                                                             labelPosition="bottom",
                                                             value=0,
-                                                            color="#fcdc64",
-                                                            size=18,
+                                                            # color="#fcdc64",
+                                                            color="#ffe9a3",
+                                                            size=24,
                                                         ),
                                                         # width=3,
                                                     )
@@ -85,59 +89,100 @@ layout = html.Div(
                             ),
                             className="mt-3",
                         ),
-                        dbc.Card(
-                            dbc.CardBody(
-                                [
-                                    html.H6("모델 예측값", className="card-title"),
-                                    daq.LEDDisplay(
-                                        id="predict_value",
-                                        label="Predict Value",
-                                        labelPosition="bottom",
-                                        color="#fcdc64",
-                                        size=18,
-                                        value=0,
-                                    ),
-                                ]
+                        # dbc.Card(
+                        #     dbc.CardBody(
+                        #         [
+                        #             html.H6("대표 알고리즘", className="card-title"),
+                        #             html.H6(
+                        #                 "XGBoost",
+                        #                 style={
+                        #                     "textAlign": "center",
+                        #                     "fontWeight": "bold",
+                        #                 },
+                        #             ),
+                        #         ]
+                        #     ),
+                        #     className="mt-3",
+                        # ),
+                        # dbc.Card(
+                        #     dbc.CardBody(
+                        #         [
+                        #             html.H6(
+                        #                 "모델 성능",
+                        #             ),
+                        #             dcc.Loading(
+                        #                 children=[
+                        #                     # Loading 화면 띄우려고 끼워놓은것
+                        #                     # html.Div(
+                        #                     #     children=[html.P("hi")],
+                        #                     #     id="loading-output-1",
+                        #                     # ),
+                        #                     dbc.Row(
+                        #                         [
+                        #                             dbc.Col(
+                        #                                 daq.LEDDisplay(
+                        #                                     id=i,
+                        #                                     label=i,
+                        #                                     labelPosition="bottom",
+                        #                                     value=0,
+                        #                                     color="#fcdc64",
+                        #                                     size=18,
+                        #                                 ),
+                        #                                 # width=3,
+                        #                             )
+                        #                             for i in [
+                        #                                 "MAPE_Value",
+                        #                                 # "R_square_XGB",
+                        #                                 "RMSE",
+                        #                             ]
+                        #                         ]
+                        #                     ),
+                        #                 ],
+                        #                 type="circle",
+                        #             ),
+                        #         ]
+                        #     ),
+                        #     className="mt-3",
+                        # ),
+                    ],
+                    width=6,
+                ),
+                dbc.Col(
+                    [
+                        html.Button(
+                            "아무 역할 없지만 데이터 불러오기 위해서 있어야 하는 버튼",
+                            id="btn_3",
+                            style={"display": "none"},
+                        ),
+                        dbc.Col(
+                            dcc.Graph(
+                                id="line_graph",
+                                # style={"height": "50vh", "width": "70vh"},
+                                figure=blank_figure(),
+                                style={"height": "45vh"},
                             ),
-                            className="mt-3",
+                            width=12,
+                        ),
+                        html.Br(),
+                        dbc.Col(
+                            dbc.Table(
+                                # using the same table as in the above example
+                                table_header + table_body,
+                                bordered=True,
+                                dark=True,
+                                hover=True,
+                                responsive=True,
+                                striped=True,
+                            )
                         ),
                     ]
-                )
+                ),
             ]
         ),
         html.Br(),
-        dbc.Row(
-            [
-                html.Button(
-                    "아무 역할 없지만 데이터 불러오기 위해서 있어야 하는 버튼",
-                    id="btn_3",
-                    style={"display": "none"},
-                ),
-                dbc.Col(
-                    dcc.Graph(
-                        id="line_graph",
-                        # style={"height": "50vh", "width": "70vh"},
-                        style={"height": "45vh"},
-                    ),
-                    width=12,
-                ),
-                html.Br(),
-                dbc.Col(
-                    dbc.Table(
-                        # using the same table as in the above example
-                        table_header + table_body,
-                        bordered=True,
-                        dark=True,
-                        hover=True,
-                        responsive=True,
-                        striped=True,
-                    )
-                ),
-            ]
-        ),
         html.Br(),
         dcc.Loading(
-            [
+            children=[
                 dcc.Store(
                     id="actual_predict_store",
                     storage_type="session",

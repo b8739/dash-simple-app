@@ -35,11 +35,10 @@ def get_shap_values(initial_store):
 
 @application.callback(
     Output("shap_importance_store", "data"),
-    Input("btn_4", "n_clicks"),
-    State("initial_store", "data"),
+    Input("initial_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def get_shap_importance(n_clicks, initial_store):
+def get_shap_importance(initial_store):
     train_x = initial_store["train_x"]
 
     shap_values = get_shap_values(initial_store)
@@ -51,15 +50,14 @@ def get_shap_importance(n_clicks, initial_store):
     shap_importance = pd.DataFrame(
         list(zip(feature_names, vals)), columns=["col_name", "feature_importance_vals"]
     )
+    print()
 
     shap_importance.sort_values(
         by=["feature_importance_vals"], ascending=False, inplace=True
     )
     shap_importance["feature_importance_vals"] = shap_importance[
         "feature_importance_vals"
-    ].round(
-        decimals=2
-    )  # round가 왠지 모르지만 작동안함
+    ].map(lambda x: round(x, 2))
 
     shap_importance_dict = shap_importance.to_dict("records")
 
