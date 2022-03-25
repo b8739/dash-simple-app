@@ -9,6 +9,8 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from dash.dependencies import Input, Output, State
+from dash_extensions.enrich import Dash, Trigger, ServersideOutput
+
 
 """ NORMAL FUNCTIONS """
 
@@ -28,7 +30,7 @@ def to_dataframe(dictData):
 
 
 @application.callback(
-    Output("df_store", "data"),
+    ServersideOutput("df_store", "data"),
     [Input("veri_dropdown", "value")],
 )
 @cache.memoize(timeout=TIMEOUT)
@@ -53,23 +55,20 @@ def preprocess_dataset(veri_dropdown):
 
     df.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
 
-    js = df.to_dict("records")
-
-    return js
+    return df
 
 
 """ VERI DATASET """
 # 아직 veri idx를 어떻게 받아서 처리할지 반영 안함
 @application.callback(
-    Output("df_veri_store", "data"),
+    ServersideOutput("df_veri_store", "data"),
     Input("df_store", "data"),
 )
 def extract_veri(df_store):
     df = excel_to_df()
 
     df_veri = df.iloc[1022:1029, :].copy()  # Data for Verifying (TTA Test)
-    js = df_veri.to_dict("records")
-    return js
+    return df_veri
 
 
 """ AVG_STORE """
@@ -78,8 +77,7 @@ def extract_veri(df_store):
     Output("avg_store", "data"),
     Input("df_store", "data"),
 )
-def get_avg(df_dict):
-    df = to_dataframe(df_dict)
+def get_avg(df):
     avg_js = round(df.mean(), 3).to_dict()
     return avg_js
 
@@ -90,9 +88,8 @@ def get_avg(df_dict):
     Output("x_y_store", "data"),
     Input("df_store", "data"),
 )
-def get_xy(df_dict):
+def get_xy(df):
     ## EXTRACT X & y SEPARATELY ##
-    df = to_dataframe(df_dict)
     X = df.drop("Biogas_prod", axis=1).to_dict(
         "records"
     )  # Take All the columns except 'Biogas_prod'
@@ -112,8 +109,7 @@ def get_xy(df_dict):
     Input("df_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def get_quantile(df_dict):
-    df = to_dataframe(df_dict)
+def get_quantile(df):
     res = {}
 
     for col in df.columns:
@@ -136,8 +132,7 @@ def get_quantile(df_dict):
     State("avg_store", "data"),
 )
 # @cache.memoize(timeout=TIMEOUT)
-def biggas_data(quantile_store, df_dict, avg_store):
-    df = to_dataframe(df_dict)
+def biggas_data(quantile_store, df, avg_store):
     df = df.iloc[len(df) - 100 : 1022]
     tag = "Biogas_prod"
     try:

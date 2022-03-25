@@ -51,11 +51,10 @@ def make_quantile_annotation(name, y_pos):
 def changeTag(
     quantile_store,
     tag,
-    df_dict,
+    df,
     avg_store,
 ):
     " " " Plotly Graph 생성 " " "
-    df = to_dataframe(df_dict)
 
     df = df.iloc[len(df) - 100 : 1022]
 

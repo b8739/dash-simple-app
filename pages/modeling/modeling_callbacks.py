@@ -206,7 +206,6 @@ def update_predict_value(data_idx, df_veri, initial_store, model_store):
     if not data_idx:
         raise PreventUpdate
     veri_idx = int(data_idx) - 1
-    df_veri = to_dataframe(df_veri)
     df_veri.reset_index(drop=True, inplace=True)
 
     veri_x = df_veri.drop(

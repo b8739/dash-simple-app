@@ -133,8 +133,7 @@ def get_dependence_plot(df, col):
     [State("dependence_container", "children")],
 )
 @cache.memoize(timeout=TIMEOUT)
-def draw_dependence_plot(shap_df, df_dict, div_container):
-    df = to_dataframe(df_dict)
+def draw_dependence_plot(shap_df, df, div_container):
     shap_df = pd.json_normalize(shap_df)
     top_5_cols = shap_df["col_name"][:4]
     # print(shap_values[:, 12])
