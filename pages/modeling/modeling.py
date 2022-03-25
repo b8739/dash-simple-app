@@ -56,25 +56,30 @@ layout = html.Div(
                             dbc.CardBody(
                                 [
                                     html.H6("모델 성능", className="card-title"),
-                                    dbc.Row(
-                                        [
-                                            dbc.Col(
-                                                daq.LEDDisplay(
-                                                    id=i,
-                                                    label=i,
-                                                    labelPosition="bottom",
-                                                    value=0,
-                                                    color="#fcdc64",
-                                                    size=18,
-                                                ),
-                                                # width=3,
-                                            )
-                                            for i in [
-                                                "MAPE_Value",
-                                                "R_square_XGB",
-                                                "RMSE",
-                                            ]
-                                        ]
+                                    dcc.Loading(
+                                        children=[
+                                            dbc.Row(
+                                                [
+                                                    dbc.Col(
+                                                        daq.LEDDisplay(
+                                                            id=i,
+                                                            label=i,
+                                                            labelPosition="bottom",
+                                                            value=0,
+                                                            color="#fcdc64",
+                                                            size=18,
+                                                        ),
+                                                        # width=3,
+                                                    )
+                                                    for i in [
+                                                        "MAPE_Value",
+                                                        # "R_square_XGB",
+                                                        "RMSE",
+                                                    ]
+                                                ]
+                                            ),
+                                        ],
+                                        type="circle",
                                     ),
                                 ]
                             ),

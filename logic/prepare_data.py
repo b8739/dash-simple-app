@@ -135,51 +135,58 @@ def get_quantile(df_dict):
     State("df_store", "data"),
     State("avg_store", "data"),
 )
-@cache.memoize(timeout=TIMEOUT)
+# @cache.memoize(timeout=TIMEOUT)
 def biggas_data(quantile_store, df_dict, avg_store):
     df = to_dataframe(df_dict)
     df = df.iloc[len(df) - 100 : 1022]
     tag = "Biogas_prod"
-    fig = px.scatter(df, x="date", y=tag, title=None, template="plotly_dark")
-    fig.update_traces(
-        mode="markers", marker=dict(size=2, line=dict(width=2, color="#f4d44d"))
-    ),
-    fig.update_yaxes(rangemode="normal")
-    # fig.update_xaxes(rangeslider_visible=True)
-    fig.update_layout(
-        yaxis_title=None,
-        xaxis_title="Date",
-        title={
-            "text": "바이오가스 생산량",
-            "xref": "paper",
-            "yref": "paper",
-            "x": 0.5,
-            # "y": 0.5,
-        },
-        margin=dict(l=70, r=70, t=70, b=50),
-    )
-    " " " Quantile 표시 " " "
-    # q_position = df[tag].min() * 1.1
-    fig.add_annotation(
-        text="Avg " + str(avg_store[tag]),
-        align="left",
-        showarrow=False,
-        xref="paper",
-        yref="paper",
-        x=1.05,
-        y=1.1,
-        bordercolor="black",
-        borderwidth=1,
-    )
-    for q in ["Q1", "Q3"]:
-        # q_position += df[tag].max() / 4
-
-        fig.add_hline(
-            y=quantile_store["Biogas_prod"][q],
-            line_dash="dot",
-            line_color="#FFA500",
-            annotation_text=q,
-            annotation_position="right",
-            opacity=0.9,
+    try:
+        fig = px.line(df, x="date", y=tag, title=None, template="plotly_dark")
+    except Exception:
+        fig = px.line(df, x="date", y=tag, title=None, template="plotly_dark")
+    finally:
+        fig.update_traces(
+            mode="lines+markers",
+            marker=dict(size=2, line=dict(width=2, color="#f4d44d")),
+            line=dict(color="#f4d44d", width=1),
+        ),
+        fig.update_yaxes(rangemode="normal")
+        # fig.update_xaxes(rangeslider_visible=True)
+        fig.update_layout(
+            yaxis_title=None,
+            xaxis_title="Date",
+            title={
+                "text": "바이오가스 생산량",
+                "xref": "paper",
+                "yref": "paper",
+                "x": 0.5,
+                # "y": 0.5,
+            },
+            margin=dict(l=70, r=70, t=70, b=50),
         )
-    return fig
+        " " " Quantile 표시 " " "
+        # q_position = df[tag].min() * 1.1
+        fig.add_annotation(
+            text="Avg " + str(avg_store[tag]),
+            align="left",
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            x=1.05,
+            y=1.1,
+            bordercolor="black",
+            borderwidth=1,
+        )
+        for q in ["Q1", "Q3"]:
+            # q_position += df[tag].max() / 4
+
+            fig.add_hline(
+                y=quantile_store["Biogas_prod"][q],
+                line_dash="dot",
+                # line_color="#FFA500",
+                line_color="white",
+                annotation_text=q,
+                annotation_position="right",
+                opacity=0.55,
+            )
+        return fig

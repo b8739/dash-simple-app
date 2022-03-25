@@ -73,11 +73,10 @@ def initial_data(x_y_store):  # split_dataset
 
 @application.callback(
     ServersideOutput("model_store", "data"),
-    Input("df_store", "data"),
-    State("initial_store", "data"),
+    Input("initial_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def create_model(df_dict, initial_store):
+def create_model(initial_store):
 
     train_Xn, train_y = initial_store["train_Xn"], initial_store["train_y"]
     model = {}
@@ -184,7 +183,7 @@ def create_callback(output):
     return get_modeling_assessment
 
 
-for i in ["MAPE_Value", "R_square_XGB", "RMSE"]:
+for i in ["MAPE_Value", "RMSE"]:
     application.callback(
         Output(i, "value"),
         Input("modeling_result_store", "data"),
@@ -200,7 +199,7 @@ for i in ["MAPE_Value", "R_square_XGB", "RMSE"]:
     State("df_veri_store", "data"),
     State("initial_store", "data"),
     State("model_store", "data"),
-    prevent_initial_call=True,
+    # prevent_initial_call=True,
 )
 @cache.memoize(timeout=TIMEOUT)
 def update_predict_value(data_idx, df_veri, initial_store, model_store):

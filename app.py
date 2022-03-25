@@ -33,6 +33,7 @@ cache = Cache(
     application.server,
     config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "cache-directory"},
 )
+
 cache.clear()
 
 application.layout = dbc.Container(

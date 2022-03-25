@@ -3,7 +3,10 @@ import dash_html_components as html
 
 import dash_bootstrap_components as dbc
 import dash_daq as daq
+import plotly.graph_objs as go
+
 from utils.constants import monitored_tags, theme
+import plotly.express as px
 
 
 def isNormal(idx):
@@ -14,12 +17,21 @@ def isNormal(idx):
         return {"state": "Normal", "color": theme["primary"]}
 
 
+def blank_figure():
+    fig = go.Figure(go.Scatter(x=[], y=[]))
+    fig.update_layout(template="plotly_dark")
+    return fig
+
+
 def plotMonitoringGraphs(graph_type, graph_number):
     children = [
         dcc.Graph(
             # figure=biggas_data(),
             id="biggas_graph",
-            style={"height": "23vh"},
+            style={
+                "height": "30vh",
+            },
+            figure=blank_figure(),
         )
     ]
     for idx in range(graph_number):
@@ -44,12 +56,13 @@ def plotMonitoringGraphs(graph_type, graph_number):
                     dcc.Graph(
                         id={"type": graph_type, "index": idx},
                         style={
-                            "height": "30vh",
+                            "height": "23vh",
                             "zIndex": 2,
                         },
+                        figure=blank_figure(),
                     ),
-                    # html.Br(),
                 ],
+                # html.Br(),
                 width=6,
                 style={"position": "relative"},
             ),
@@ -122,30 +135,23 @@ graphs = (
 )
 
 
-dropdowns = dbc.Collapse(
+dropdowns = dbc.Row(
     [
-        dbc.Row(
-            [
-                dbc.Col(
-                    dcc.Dropdown(
-                        id={"type": "tagDropdown", "index": idx},
-                        options=[{"label": c, "value": c} for c in monitored_tags],
-                        placeholder="Select Tag",
-                        value=monitored_tags[idx],
-                        clearable=False,
-                        # persistence=True, #이것 때문에
-                        style={"backgroundColor": "rgb(48, 48, 48)", "display": "none"},
-                    ),
-                    width=2,
-                )
-                for idx in range(4)
-            ],
-            justify="left",
-        ),
-        # html.Br(),
+        dbc.Col(
+            dcc.Dropdown(
+                id={"type": "tagDropdown", "index": idx},
+                options=[{"label": c, "value": c} for c in monitored_tags],
+                placeholder="Select Tag",
+                value=monitored_tags[idx],
+                clearable=False,
+                # persistence=True, #이것 때문에
+                style={"backgroundColor": "rgb(48, 48, 48)", "display": "none"},
+            ),
+            width=2,
+        )
+        for idx in range(4)
     ],
-    id="dropdowns-collapse",
-    is_open=True,
+    justify="left",
 )
 
 
@@ -155,16 +161,11 @@ contents = dbc.Col(
             dbc.Row(
                 [
                     dbc.Col(
-                        html.H6("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
+                        [
+                            html.H6("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
+                            html.Br(),
+                        ]
                     ),
-                    # dbc.Button(
-                    #     "Toggle",
-                    #     color="primary",
-                    #     id="collapse_btn",
-                    #     n_clicks=0,
-                    #     className="d-grid gap-2 col-1",
-                    #     style={"position": "absolute", "top": 10, "left": 7},
-                    # ),
                     # Normal
                     dbc.Col(
                         [
@@ -212,27 +213,28 @@ contents = dbc.Col(
                         },
                         width=4,
                     ),
+                    dropdowns,
+                    dbc.Col(
+                        graphs,
+                    ),
                 ],
                 justify="between",
             ),
-            dropdowns,
-            dbc.Col(
-                graphs,
-            ),
         ],
+        id="monitor-loading",
         type="circle",
-    ),
+    )
 )
 layout = html.Div(
     dbc.Row(
         [
-            dbc.Col(
-                [
-                    contents,
-                    dbc.Row(),
-                ],
-                width=12,
-            ),
+            # dbc.Col(
+            #     [
+            #         contents,
+            #     ],
+            #     width=12,
+            # ),
+            contents
         ],
         style={"position": "relative"},
     ),
