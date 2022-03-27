@@ -20,53 +20,9 @@ from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
 from utils.constants import algorithm_type
 from sklearn.preprocessing import StandardScaler
-from logic.prepare_data import to_dataframe
 from dash_extensions.enrich import Dash, Trigger, ServersideOutput
 from sklearn.model_selection import train_test_split
 from dash.exceptions import PreventUpdate
-
-
-@application.callback(
-    ServersideOutput("initial_store", "data"),
-    Input("x_y_store", "data"),
-)
-@cache.memoize(timeout=TIMEOUT)
-def initial_data(x_y_store):  # split_dataset
-
-    X, y = to_dataframe(x_y_store["X"]), pd.Series(x_y_store["y"])
-
-    ## SET 'TRAIN', 'TEST' DATA, TRAIN/TEST RATIO, & 'WAY OF RANDOM SAMPLING' ##
-    X_train, X_test, train_y, test_y = train_test_split(
-        X, y, test_size=0.2, random_state=12345
-    )
-
-    # X_train, X_test, train_y, test_y = train_test_split(X, y, test_size = 0.2, random_state = 56789)
-
-    train_x = X_train.drop(["date"], axis=1)  # Delete 'date' column from train data
-    test_x = X_test.drop(["date"], axis=1)  # Delete 'date' column from test data
-
-    # scalerX = MinMaxScaler()
-    scalerX = StandardScaler()  # Data standardization (to Standard Normal distribution)
-    # scalerX = RobustScaler()
-    scalerX.fit(train_x)
-    train_Xn = scalerX.transform(train_x)  # Scaling the train data
-    test_Xn = scalerX.transform(test_x)  # Scaling the test data
-
-    # train_b = scalerX.inverse_transform(train_Xn)
-    dict_values = {
-        # df
-        "train_x": train_x,
-        "test_x": test_x,
-        "X_test": X_test,
-        # numpy
-        "train_Xn": train_Xn,
-        "test_Xn": test_Xn,
-        # series
-        "train_y": train_y,
-        "test_y": test_y,
-    }
-
-    return dict_values
 
 
 """ CREATE MODEL """
@@ -261,7 +217,6 @@ def save_actual_predictive_df(modeling_result_store, initial_store):
         modeling_result_store["prediction"],
     )
     result_df_dict = result_df.to_dict("records")
-    print("Actual Predictive Data 저장 완료")
     return result_df_dict
 
 
@@ -283,8 +238,8 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#08a4a7",
-            marker=dict(size=5),
+            line_color="#259fed",
+            marker=dict(size=0.1),
         ),
         go.Scatter(
             name="Predictive",
@@ -293,23 +248,27 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#f1444c",
-            marker=dict(size=0.3),
+            line_color="#FFE87C",
+            marker=dict(size=4),
         ),
     ]
 
     fig = go.Figure(data=trace_list)
+    fig.update_layout(template="plotly_dark")
 
     fig.update_layout(
         title={
-            "text": "Actual vs Predict",
+            "text": "바이오가스 생산량 예측값 실제값 비교",
             "y": 0.9,
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
             # "font": {"size": 10},
-        }
+        },
+        paper_bgcolor="#32383e",
+        plot_bgcolor="#32383e",
     )
-
-    fig.update_layout(template="plotly_dark")
+    fig.update_xaxes(showgrid=True, gridcolor="#696969")
+    fig.update_yaxes(showgrid=True, gridcolor="#696969")
+    # fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor="#18191A")
     return fig

@@ -36,115 +36,126 @@ layout = html.Div(
         dbc.Row(
             [
                 dbc.Col(
-                    [
-                        dbc.Card(
-                            dbc.CardBody(
-                                [
-                                    html.H6(
-                                        "모델 예측값",
-                                    ),
-                                    daq.LEDDisplay(
-                                        id="predict_value",
-                                        value=28485,
-                                        label="Predict Value",
-                                        labelPosition="bottom",
-                                        color="#fcdc64",
-                                        size=40,
-                                    ),
-                                    html.H6(
-                                        "모델 성능",
-                                    ),
-                                    dcc.Loading(
-                                        children=[
-                                            # Loading 화면 띄우려고 끼워놓은것
-                                            # html.Div(
-                                            #     children=[html.P("hi")],
-                                            #     id="loading-output-1",
-                                            # ),
-                                            dbc.Row(
-                                                [
-                                                    dbc.Col(
-                                                        daq.LEDDisplay(
-                                                            id=i,
-                                                            label=i,
-                                                            labelPosition="bottom",
-                                                            value=0,
-                                                            # color="#fcdc64",
-                                                            color="#ffe9a3",
-                                                            size=24,
-                                                        ),
-                                                        # width=3,
-                                                    )
-                                                    for i in [
-                                                        "MAPE_Value",
-                                                        # "R_square_XGB",
-                                                        "RMSE",
-                                                    ]
-                                                ]
-                                            ),
-                                        ],
-                                        type="circle",
-                                    ),
-                                ]
+                    html.Div(
+                        [
+                            dbc.Card(
+                                dbc.CardBody(
+                                    [
+                                        html.H6(
+                                            "모델 예측값 (XGBoost)",
+                                        ),
+                                        daq.LEDDisplay(
+                                            id="predict_value",
+                                            value=28485,
+                                            label="Predict Value",
+                                            labelPosition="bottom",
+                                            color="#fcdc64",
+                                            size=40,
+                                        ),
+                                    ]
+                                ),
+                                className="mt-3",
+                                style={"height": "50%"},
                             ),
-                            className="mt-3",
-                        ),
-                        # dbc.Card(
-                        #     dbc.CardBody(
-                        #         [
-                        #             html.H6("대표 알고리즘", className="card-title"),
-                        #             html.H6(
-                        #                 "XGBoost",
-                        #                 style={
-                        #                     "textAlign": "center",
-                        #                     "fontWeight": "bold",
-                        #                 },
-                        #             ),
-                        #         ]
-                        #     ),
-                        #     className="mt-3",
-                        # ),
-                        # dbc.Card(
-                        #     dbc.CardBody(
-                        #         [
-                        #             html.H6(
-                        #                 "모델 성능",
-                        #             ),
-                        #             dcc.Loading(
-                        #                 children=[
-                        #                     # Loading 화면 띄우려고 끼워놓은것
-                        #                     # html.Div(
-                        #                     #     children=[html.P("hi")],
-                        #                     #     id="loading-output-1",
-                        #                     # ),
-                        #                     dbc.Row(
-                        #                         [
-                        #                             dbc.Col(
-                        #                                 daq.LEDDisplay(
-                        #                                     id=i,
-                        #                                     label=i,
-                        #                                     labelPosition="bottom",
-                        #                                     value=0,
-                        #                                     color="#fcdc64",
-                        #                                     size=18,
-                        #                                 ),
-                        #                                 # width=3,
-                        #                             )
-                        #                             for i in [
-                        #                                 "MAPE_Value",
-                        #                                 # "R_square_XGB",
-                        #                                 "RMSE",
-                        #                             ]
-                        #                         ]
-                        #                     ),
-                        #                 ],
-                        #                 type="circle",
-                        #             ),
-                        #         ]
-                        #     ),
-                        #     className="mt-3",
-                        # ),
-                    ],
+                            dbc.Card(
+                                dbc.CardBody(
+                                    [
+                                        html.H6(
+                                            "모델 성능",
+                                        ),
+                                        dcc.Loading(
+                                            children=[
+                                                # Loading 화면 띄우려고 끼워놓은것
+                                                # html.Div(
+                                                #     children=[html.P("hi")],
+                                                #     id="loading-output-1",
+                                                # ),
+                                                dbc.Row(
+                                                    [
+                                                        dbc.Col(
+                                                            daq.LEDDisplay(
+                                                                id=i,
+                                                                label=i,
+                                                                labelPosition="bottom",
+                                                                value=0,
+                                                                # color="#fcdc64",
+                                                                color="#ffe9a3",
+                                                                size=24,
+                                                            ),
+                                                            # width=3,
+                                                        )
+                                                        for i in [
+                                                            "MAPE_Value",
+                                                            # "R_square_XGB",
+                                                            "RMSE",
+                                                        ]
+                                                    ],
+                                                ),
+                                            ],
+                                            type="circle",
+                                        ),
+                                    ]
+                                ),
+                                style={"height": "50%"},
+                            ),
+                        ],
+                        style={"height": "45vh"},
+                    ),
+                    # dbc.Card(
+                    #     dbc.CardBody(
+                    #         [
+                    #             html.H6("대표 알고리즘", className="card-title"),
+                    #             html.H6(
+                    #                 "XGBoost",
+                    #                 style={
+                    #                     "textAlign": "center",
+                    #                     "fontWeight": "bold",
+                    #                 },
+                    #             ),
+                    #         ]
+                    #     ),
+                    #     className="mt-3",
+                    # ),
+                    # dbc.Card(
+                    #     dbc.CardBody(
+                    #         [
+                    #             html.H6(
+                    #                 "모델 성능",
+                    #             ),
+                    #             dcc.Loading(
+                    #                 children=[
+                    #                     # Loading 화면 띄우려고 끼워놓은것
+                    #                     # html.Div(
+                    #                     #     children=[html.P("hi")],
+                    #                     #     id="loading-output-1",
+                    #                     # ),
+                    #                     dbc.Row(
+                    #                         [
+                    #                             dbc.Col(
+                    #                                 daq.LEDDisplay(
+                    #                                     id=i,
+                    #                                     label=i,
+                    #                                     labelPosition="bottom",
+                    #                                     value=0,
+                    #                                     color="#fcdc64",
+                    #                                     size=18,
+                    #                                 ),
+                    #                                 # width=3,
+                    #                             )
+                    #                             for i in [
+                    #                                 "MAPE_Value",
+                    #                                 # "R_square_XGB",
+                    #                                 "RMSE",
+                    #                             ]
+                    #                         ]
+                    #                     ),
+                    #                 ],
+                    #                 type="circle",
+                    #             ),
+                    #         ]
+                    #     ),
+                    #     className="mt-3",
+                    # ),
                     width=6,
                 ),
                 dbc.Col(
@@ -159,7 +170,7 @@ layout = html.Div(
                                 id="line_graph",
                                 # style={"height": "50vh", "width": "70vh"},
                                 figure=blank_figure(),
-                                style={"height": "45vh"},
+                                style={"height": "45vh", "marginTop": "10px"},
                             ),
                             width=12,
                         ),

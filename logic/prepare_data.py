@@ -1,7 +1,7 @@
 import pandas as pd
 
 from app import application, cache
-from utils.constants import TIMEOUT, monitored_tags
+from utils.constants import TIMEOUT, theme
 from logic import prepare_data
 import sys
 import plotly.express as px
@@ -11,6 +11,17 @@ from sklearn.preprocessing import StandardScaler
 from dash.dependencies import Input, Output, State
 from dash_extensions.enrich import Dash, Trigger, ServersideOutput
 
+# anomaly
+import numpy as np
+
+from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import accuracy_score
+import dash_html_components as html
+
+import dash_bootstrap_components as dbc
+import dash_daq as daq
 
 """ NORMAL FUNCTIONS """
 
@@ -38,6 +49,7 @@ def preprocess(df):
     ServersideOutput("df_veri_store", "data"),
     Trigger("btn_3", "n_clicks"),
 )
+@cache.memoize(timeout=TIMEOUT)
 def extract_veri():
     df = excel_to_df()
     df = preprocess(df)
@@ -45,6 +57,9 @@ def extract_veri():
         1022:1029:,
     ].copy()  # Data for Verifying (TTA Test)
     return df_veri
+
+
+## For Verification Data : TTA 테스트 데이터 (7개)
 
 
 """ TRAIN TEST DATASET """
@@ -84,6 +99,7 @@ def extract_train_test(dropdown_value, df_store, df_veri_store):
     Output("avg_store", "data"),
     Input("df_store", "data"),
 )
+@cache.memoize(timeout=TIMEOUT)
 def get_avg(df):
     avg_js = round(df.mean(), 3).to_dict()
     return avg_js
@@ -92,20 +108,149 @@ def get_avg(df):
 """ X_Y_STORE """
 # 추후 사용시 dict형태로 사용하게 되었으므로 재확인
 @application.callback(
-    Output("x_y_store", "data"),
+    ServersideOutput("x_y_store", "data"),
     Input("df_store", "data"),
 )
+@cache.memoize(timeout=TIMEOUT)
 def get_xy(df):
     ## EXTRACT X & y SEPARATELY ##
-    X = df.drop("Biogas_prod", axis=1).to_dict(
-        "records"
-    )  # Take All the columns except 'Biogas_prod'
-    y = df["Biogas_prod"].to_dict()  # Take 'Biogas_prod' column
+    X = df.drop("Biogas_prod", axis=1)  # Take All the columns except 'Biogas_prod'
+    y = df["Biogas_prod"]  # Take 'Biogas_prod' column
     return {"X": X, "y": y}
 
 
-""" Y SERIES (train_y,test_y) """
-""" X DF (train_x, test_x, X_test) """
+""" INITIAL STORE (TRAIN & TEST)"""
+
+
+@application.callback(
+    ServersideOutput("initial_store", "data"),
+    Input("x_y_store", "data"),
+)
+@cache.memoize(timeout=TIMEOUT)
+def initial_data(x_y_store):  # split_dataset
+
+    X, y = x_y_store["X"], x_y_store["y"]
+
+    ## SET 'TRAIN', 'TEST' DATA, TRAIN/TEST RATIO, & 'WAY OF RANDOM SAMPLING' ##
+    X_train, X_test, train_y, test_y = train_test_split(
+        X, y, test_size=0.2, random_state=12345
+    )
+
+    # X_train, X_test, train_y, test_y = train_test_split(X, y, test_size = 0.2, random_state = 56789)
+
+    train_x = X_train.drop(["date"], axis=1)  # Delete 'date' column from train data
+    test_x = X_test.drop(["date"], axis=1)  # Delete 'date' column from test data
+
+    # scalerX = MinMaxScaler()
+    scalerX = StandardScaler()  # Data standardization (to Standard Normal distribution)
+    # scalerX = RobustScaler()
+    scalerX.fit(train_x)
+    train_Xn = scalerX.transform(train_x)  # Scaling the train data
+    test_Xn = scalerX.transform(test_x)  # Scaling the test data
+
+    # train_b = scalerX.inverse_transform(train_Xn)
+    dict_values = {
+        # df
+        "train_x": train_x,
+        "test_x": test_x,
+        "X_test": X_test,
+        # numpy
+        "train_Xn": train_Xn,
+        "test_Xn": test_Xn,
+        # series
+        "train_y": train_y,
+        "test_y": test_y,
+    }
+
+    return dict_values
+
+
+def create_indicator(status):
+    # normal일때 Span, indicator, tooltip
+    """STYLE"""
+    normal_span = {
+        "marginRight": 10,
+        "textAlign": "center",
+    }
+    abnormal_span = {
+        "marginLeft": 20,
+        "marginRight": 10,
+        "textAlign": "center",
+    }
+    normal_indicator = {"display": "inline-block"}
+    abnormal_indicator = {"display": "inline-block"}
+
+    """CONDITION"""
+    if status == "normal":
+        normal_span.update({"color": "white"})
+        abnormal_span.update({"color": "grey"})
+        abnormal_indicator.update({"opacity": "20%"})
+    elif status == "abnormal":
+        normal_span.update({"color": "grey"})
+        normal_indicator.update({"opacity": "20%"})
+        abnormal_span.update({"color": "white"})
+
+    layout = (
+        html.Span(
+            # isNormal(idx)["state"],
+            "Normal  ",
+            style=normal_span,
+        ),
+    )
+    daq.Indicator(
+        id="indicator",
+        color=theme["primary"],
+        value="Normal",
+        className="dark-theme-control",
+        style=normal_indicator,
+    ),
+    dbc.Tooltip("정상 작동중입니다.", target="indicator"),
+    html.Span(
+        # isNormal(idx)["state"],
+        "Abnormal",
+        style=abnormal_span,
+    ),
+    daq.Indicator(
+        id="indicator2",
+        color="rgba(255, 0, 0, 0.1)",
+        # color="grey",
+        value="Abnormal",
+        className="dark-theme-control",
+        style=abnormal_indicator,
+    )
+    return layout
+
+
+"""ANOMALY DETECTION"""
+
+# 아직 veri idx를 어떻게 받아서 처리할지 반영 안함
+@application.callback(
+    Output("anomaly_indication", "children"),
+    Input("initial_store", "data"),
+    State("veri_dropdown", "value"),
+    State("df_veri_store", "data"),
+)
+@cache.memoize(timeout=TIMEOUT)
+def anomaly_detect(initial_store, dropdown_value, df_veri_store):
+    isolation_forest = IsolationForest(
+        n_estimators=500, max_samples=256, random_state=1
+    )
+    isolation_forest.fit(initial_store["X_train"])
+    # 전체 Veri가 아니라 새로 가져온 행에 대한 verfication 데이터
+    df_veri = df_veri_store.iloc[1022 + dropdown_value]
+
+    X_veri = df_veri.drop(columns=["date", "Biogas_prod"])
+    veri_y = df_veri["Biogas_prod"]
+
+    a_scores_veri = -1 * isolation_forest.score_samples(X_veri)
+
+    print(a_scores_veri)
+    print(np.where(a_scores_veri >= 0.60))
+    print(a_scores_veri[np.where(a_scores_veri >= 0.60)])
+    ###LAYOUT###
+
+    create_indicator()
+    return
 
 
 """ QUANTILE """
@@ -138,7 +283,7 @@ def get_quantile(df):
     State("df_store", "data"),
     State("avg_store", "data"),
 )
-# @cache.memoize(timeout=TIMEOUT)
+@cache.memoize(timeout=TIMEOUT)
 def biggas_data(quantile_store, df, avg_store):
     df = df.iloc[len(df) - 100 : 1022]
     tag = "Biogas_prod"

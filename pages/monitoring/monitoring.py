@@ -161,40 +161,7 @@ contents = dbc.Col(
                     # Normal
                     dbc.Col(
                         [
-                            html.Span(
-                                # isNormal(idx)["state"],
-                                "Normal  ",
-                                style={
-                                    "marginRight": 10,
-                                    "textAlign": "center",
-                                },
-                            ),
-                            daq.Indicator(
-                                id="indicator",
-                                color=theme["primary"],
-                                value="Normal",
-                                className="dark-theme-control",
-                                style={"display": "inline-block"},
-                            ),
-                            dbc.Tooltip("정상 작동중입니다.", target="indicator"),
-                            html.Span(
-                                # isNormal(idx)["state"],
-                                "Abnormal",
-                                style={
-                                    "marginLeft": 20,
-                                    "marginRight": 10,
-                                    "textAlign": "center",
-                                    "color": "grey",
-                                },
-                            ),
-                            daq.Indicator(
-                                id="indicator2",
-                                color="rgba(255, 0, 0, 0.1)",
-                                # color="grey",
-                                value="Abnormal",
-                                className="dark-theme-control",
-                                style={"display": "inline-block"},
-                            ),
+                            html.Div(children=[],id='anomaly_indication')
                         ],
                         style={
                             "paddingTop": 8,
