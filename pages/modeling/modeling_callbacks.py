@@ -31,41 +31,44 @@ from dash.exceptions import PreventUpdate
 @application.callback(
     ServersideOutput("model_store", "data"),
     Input("initial_store", "data"),
+    State("model_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def create_model(initial_store):
+def create_model(initial_store, model_store):
+    if model_store:
+        raise PreventUpdate
+    else:
+        train_Xn, train_y = initial_store["train_Xn"], initial_store["train_y"]
+        model = {}
+        # model = None
+        model["xgb"] = xgb.XGBRegressor(
+            n_estimators=1800,
+            learning_rate=0.01,
+            gamma=0.1,
+            eta=0.04,
+            subsample=0.75,
+            colsample_bytree=0.5,
+            max_depth=7,
+        )
+        model["xgb"].fit(train_Xn, train_y)
 
-    train_Xn, train_y = initial_store["train_Xn"], initial_store["train_y"]
-    model = {}
-    # model = None
-    model["xgb"] = xgb.XGBRegressor(
-        n_estimators=1800,
-        learning_rate=0.01,
-        gamma=0.1,
-        eta=0.04,
-        subsample=0.75,
-        colsample_bytree=0.5,
-        max_depth=7,
-    )
-    model["xgb"].fit(train_Xn, train_y)
+        model["svr"] = SVR(
+            kernel="rbf",
+            C=100000,
+            epsilon=0.9,
+            gamma=0.0025,
+            cache_size=200,
+            coef0=0.0,
+            degree=3,
+            max_iter=-1,
+            tol=0.0001,
+        )
+        model["svr"].fit(train_Xn, train_y)
 
-    model["svr"] = SVR(
-        kernel="rbf",
-        C=100000,
-        epsilon=0.9,
-        gamma=0.0025,
-        cache_size=200,
-        coef0=0.0,
-        degree=3,
-        max_iter=-1,
-        tol=0.0001,
-    )
-    model["svr"].fit(train_Xn, train_y)
+        model["rf"] = RandomForestRegressor(n_estimators=400, min_samples_split=3)
+        model["rf"].fit(train_Xn, train_y)
 
-    model["rf"] = RandomForestRegressor(n_estimators=400, min_samples_split=3)
-    model["rf"].fit(train_Xn, train_y)
-
-    return model
+        return model
 
 
 """ GET MODELING RESULT"""
@@ -238,7 +241,7 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#259fed",
+            line_color="#f1444c",
             marker=dict(size=0.1),
         ),
         go.Scatter(
@@ -248,7 +251,7 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#FFE87C",
+            line_color="#08a4a7",
             marker=dict(size=4),
         ),
     ]

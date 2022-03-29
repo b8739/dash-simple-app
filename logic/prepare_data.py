@@ -87,6 +87,7 @@ def extract_train_test(dropdown_value, df_store, df_veri_store):
         df.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
         return df
     else:
+        print(df_veri_store)
         new_df = pd.concat(
             [df_store, df_veri_store[:dropdown_value]], ignore_index=True
         )
@@ -165,92 +166,126 @@ def initial_data(x_y_store):  # split_dataset
     return dict_values
 
 
-def create_indicator(status):
-    # normal일때 Span, indicator, tooltip
-    """STYLE"""
-    normal_span = {
-        "marginRight": 10,
-        "textAlign": "center",
-    }
-    abnormal_span = {
-        "marginLeft": 20,
-        "marginRight": 10,
-        "textAlign": "center",
-    }
-    normal_indicator = {"display": "inline-block"}
-    abnormal_indicator = {"display": "inline-block"}
-
-    """CONDITION"""
-    if status == "normal":
-        normal_span.update({"color": "white"})
-        abnormal_span.update({"color": "grey"})
-        abnormal_indicator.update({"opacity": "20%"})
-    elif status == "abnormal":
-        normal_span.update({"color": "grey"})
-        normal_indicator.update({"opacity": "20%"})
-        abnormal_span.update({"color": "white"})
-
-    layout = (
-        html.Span(
-            # isNormal(idx)["state"],
-            "Normal  ",
-            style=normal_span,
-        ),
-    )
-    daq.Indicator(
-        id="indicator",
-        color=theme["primary"],
-        value="Normal",
-        className="dark-theme-control",
-        style=normal_indicator,
-    ),
-    dbc.Tooltip("정상 작동중입니다.", target="indicator"),
-    html.Span(
-        # isNormal(idx)["state"],
-        "Abnormal",
-        style=abnormal_span,
-    ),
-    daq.Indicator(
-        id="indicator2",
-        color="rgba(255, 0, 0, 0.1)",
-        # color="grey",
-        value="Abnormal",
-        className="dark-theme-control",
-        style=abnormal_indicator,
-    )
-    return layout
-
-
 """ANOMALY DETECTION"""
 
 # 아직 veri idx를 어떻게 받아서 처리할지 반영 안함
 @application.callback(
-    Output("anomaly_indication", "children"),
-    Input("initial_store", "data"),
+    Output("anomaly_store", "data"),
+    Input("x_y_store", "data"),
     State("veri_dropdown", "value"),
     State("df_veri_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def anomaly_detect(initial_store, dropdown_value, df_veri_store):
-    isolation_forest = IsolationForest(
-        n_estimators=500, max_samples=256, random_state=1
-    )
-    isolation_forest.fit(initial_store["X_train"])
-    # 전체 Veri가 아니라 새로 가져온 행에 대한 verfication 데이터
-    df_veri = df_veri_store.iloc[1022 + dropdown_value]
+def anomaly_detect(x_y_store, dropdown_value, df_veri_store):
+    if not dropdown_value:
+        return "normal"
+    else:
+        """TRAIN TEST SPLIT"""
+        X_train_0, X_test_0, train_y, test_y = train_test_split(
+            x_y_store["X"], x_y_store["y"], test_size=0.2, random_state=123
+        )
 
-    X_veri = df_veri.drop(columns=["date", "Biogas_prod"])
-    veri_y = df_veri["Biogas_prod"]
+        X_train_0 = X_train_0.reset_index(drop=True)
+        X_train = X_train_0.drop(columns=["date"])
 
-    a_scores_veri = -1 * isolation_forest.score_samples(X_veri)
+        """ISOLATION_FOREST"""
+        isolation_forest = IsolationForest(
+            n_estimators=500, max_samples=256, random_state=1
+        )
+        isolation_forest.fit(X_train)
+        # 전체 Veri가 아니라 새로 가져온 행에 대한 verfication 데이터
 
-    print(a_scores_veri)
-    print(np.where(a_scores_veri >= 0.60))
-    print(a_scores_veri[np.where(a_scores_veri >= 0.60)])
-    ###LAYOUT###
+        X_veri = df_veri_store.drop(columns=["date", "Biogas_prod"])
 
-    create_indicator()
-    return
+        a_scores_veri = -1 * isolation_forest.score_samples(X_veri)
+
+        """DETECTION ALL"""
+        a_scores_veri = -1 * isolation_forest.score_samples(
+            pd.DataFrame(X_veri.iloc[(dropdown_value - 1)]).T
+        )
+        print(a_scores_veri)
+
+        """DETECTION SINGLE"""
+        # compare_train = pd.concat([pd.Series(X_train.quantile(0.025)), pd.Series(X_train.iloc[479, ])], axis=1)
+
+        # print(compare_train)  # 첫 번째 컬럼값 (2.5% 미만)보다 작은 값이면 이상치로 적용
+
+        """RETURN LAYOUT BASED ON THE RESULT"""
+        return "abnormal"
+
+
+# """ NORMAL ALL SPAN CALLBACK"""
+
+
+# @application.callback(
+#     Output("normal_all_span", "style"),
+#     Input("anomaly_store", "data"),
+# )
+# @cache.memoize(timeout=TIMEOUT)
+# def normal_span(anomaly_store):
+#     default_style = {
+#         "marginRight": 10,
+#         "textAlign": "center",
+#     }
+#     if anomaly_store == "normal":
+#         default_style.update({"color": "white"})
+
+#     else:
+#         default_style.update({"color": "grey"})
+#     return default_style
+
+
+# """ NORMAL ALL INDICATOR CALLBACK"""
+
+
+# @application.callback(
+#     Output("normal_all_indicator", "color"),
+#     Input("anomaly_store", "data"),
+# )
+# # rgba(0, 234, 100, 1.0)
+# @cache.memoize(timeout=TIMEOUT)
+# def normal_indicator(anomaly_store):
+#     if anomaly_store == "normal":
+#         return "rgba(0, 234, 100, 1.0)"
+#     else:
+#         return "(0, 234, 100, 0.1)"
+
+
+# """ ABNORMAL ALL SPAN CALLBACK"""
+
+
+# @application.callback(
+#     Output("abnormal_all_span", "style"),
+#     Input("anomaly_store", "data"),
+# )
+# @cache.memoize(timeout=TIMEOUT)
+# def abnormal_span(anomaly_store):
+#     default_style = {
+#         "marginRight": 10,
+#         "textAlign": "center",
+#     }
+#     if anomaly_store == "normal":
+#         default_style.update({"color": "grey"})
+
+#     else:
+#         default_style.update({"color": "white"})
+#     return default_style
+
+
+# """ ABNORMAL ALL INDICATOR CALLBACK"""
+
+
+# @application.callback(
+#     Output("abnormal_all_indicator", "color"),
+#     Input("anomaly_store", "data"),
+# )
+# # rgba(0, 234, 100, 1.0)
+# @cache.memoize(timeout=TIMEOUT)
+# def abnormal_indicator(anomaly_store):
+#     if anomaly_store == "normal":
+#         return "rgba(255, 0, 0, 0.1)"
+#     else:
+#         return "rgba(255, 0, 0)"
 
 
 """ QUANTILE """

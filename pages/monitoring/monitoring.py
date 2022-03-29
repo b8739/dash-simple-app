@@ -161,7 +161,43 @@ contents = dbc.Col(
                     # Normal
                     dbc.Col(
                         [
-                            html.Div(children=[],id='anomaly_indication')
+                            html.Span(
+                                # isNormal(idx)["state"],
+                                "Normal  ",
+                                id="normal_all_span",
+                                style={
+                                    "marginRight": 10,
+                                    "textAlign": "center",
+                                    "color": "white",
+                                },
+                            ),
+                            daq.Indicator(
+                                id="normal_all_indicator",
+                                color=theme["primary"],
+                                value="Normal",
+                                className="dark-theme-control",
+                                style={"display": "inline-block"},
+                            ),
+                            dbc.Tooltip("정상 작동중입니다.", target="indicator"),
+                            html.Span(
+                                # isNormal(idx)["state"],
+                                "Abnormal",
+                                id="abnormal_all_span",
+                                style={
+                                    "marginLeft": 20,
+                                    "marginRight": 10,
+                                    "textAlign": "center",
+                                    "color": "grey",
+                                },
+                            ),
+                            daq.Indicator(
+                                id="abnormal_all_indicator",
+                                color="rgba(255, 0, 0, 0.1)",
+                                # color="grey",
+                                value="Abnormal",
+                                className="dark-theme-control",
+                                style={"display": "inline-block"},
+                            ),
                         ],
                         style={
                             "paddingTop": 8,

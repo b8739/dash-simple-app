@@ -44,6 +44,10 @@ datastore = html.Div(
                 id="modeling_assessment_store",
                 storage_type="session",
             ),
+            dcc.Store(
+                id="anomaly_store",
+                storage_type="session",
+            ),
         ],
         # fullscreen=True,
         type="circle",
