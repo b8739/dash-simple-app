@@ -89,9 +89,7 @@ def get_modeling_result(model_store, initial_store):
     # 모델 만들고 실행
     model = model_store
     for i in algorithm_type:
-        result = algorithm.run(
-            i, model[i], initial_store["test_Xn"], initial_store["test_y"]
-        )
+        result = model["xgb"].predict(initial_store["test_Xn"])
         # 대푯값 비교해서 최소값으로 갱신
         # if rep_prediction["value"] > result["RMSE"]:
         #     rep_prediction = result
@@ -101,8 +99,20 @@ def get_modeling_result(model_store, initial_store):
     return rep_prediction
 
 
-""" GET MODELING ASSESSMENT """
+@application.callback(
+    Output("modeling_assessment_store", "data"),
+    Input("modeling_result_store", "data"),
+    State("initial_store", "data"),
+)
+@cache.memoize(timeout=TIMEOUT)
+def get_evaluation(modeling_result_store, initial_store):
+    evaluation = algorithm.evaluate_model(
+        "xgb", modeling_result_store, initial_store["test_y"]
+    )
+    return evaluation
 
+
+""" GET MODELING ASSESSMENT """
 
 # @cache.memoize(timeout=TIMEOUT)
 # def get_modeling_assessment():
@@ -141,13 +151,13 @@ def get_modeling_result(model_store, initial_store):
 
 
 def create_callback(output):
-    def get_modeling_assessment(modeling_result_store):
+    def get_modeling_assessment(modeling_assessment_store):
         if output == "MAPE_Value":
-            value = modeling_result_store["MAPE_Value"]
+            value = modeling_assessment_store["MAPE_Value"]
         elif output == "R_square_XGB":
-            value = modeling_result_store["R_square_XGB"]
+            value = modeling_assessment_store["R_square_XGB"]
         elif output == "RMSE":
-            value = modeling_result_store["RMSE"]
+            value = modeling_assessment_store["RMSE"]
         return round(value, 3)
 
     return get_modeling_assessment
@@ -156,7 +166,7 @@ def create_callback(output):
 for i in ["MAPE_Value", "RMSE"]:
     application.callback(
         Output(i, "value"),
-        Input("modeling_result_store", "data"),
+        Input("modeling_assessment_store", "data"),
     )(create_callback(i))
 
 
@@ -217,7 +227,7 @@ def save_actual_predictive_df(modeling_result_store, initial_store):
     result_df = algorithm.get_actual_predictive(
         initial_store["X_test"],
         initial_store["test_y"],
-        modeling_result_store["prediction"],
+        modeling_result_store,
     )
     result_df_dict = result_df.to_dict("records")
     return result_df_dict

@@ -7,6 +7,8 @@ import dash_bootstrap_components as dbc  # pip3 install dash-bootstrap-component
 import dash_daq as daq
 from utils.constants import theme, blank_figure
 
+table_header = [html.Thead(html.Tr([html.Th("주요 변수"), html.Th("영향도")]))]
+table_body = [html.Tbody()]
 
 layout = html.Div(
     [
@@ -24,13 +26,47 @@ layout = html.Div(
                     dbc.Row(
                         [
                             dbc.Col(
+                                dbc.Table(
+                                    # using the same table as in the above example
+                                    table_header + table_body,
+                                    id="influence_table",
+                                    bordered=True,
+                                    dark=True,
+                                    hover=True,
+                                    responsive=True,
+                                    striped=True,
+                                    style={"height": "100%"},
+                                    size="sm",
+                                )
+                                # dash_table.DataTable(
+                                #     id="influence_table",
+                                #     columns=[
+                                #         {"id": c, "name": c} for c in ["주요 변수", "영향도"]
+                                #     ],
+                                #     style_header={
+                                #         "backgroundColor": "rgb(30, 30, 30)",
+                                #         "color": "white",
+                                #     },
+                                #     style_data={
+                                #         "backgroundColor": "rgb(50, 50, 50)",
+                                #         "color": "white",
+                                #     },
+                                #     style_table={
+                                #         "height": "30vh",
+                                #     },
+                                # )
+                                ,
+                                style={"height": "32vh"},
+                            ),
+                            dbc.Col(
                                 dcc.Graph(
                                     id="bar_graph",
                                     figure=blank_figure(),
-                                    style={"height": "40vh"},
+                                    style={"height": "100%"},
                                 ),
+                                style={"height": "32vh"},
                             ),
-                        ]
+                        ],
                     ),
                 ]
             ),

@@ -100,6 +100,27 @@ def draw_shap_bar_graph(df):
     return fig
 
 
+@application.callback(
+    Output("influence_table", "children"),
+    Input("shap_importance_store", "data"),
+    State("influence_table", "children"),
+)
+@cache.memoize(timeout=TIMEOUT)
+def draw_influence_table(df, div_children):
+    df = df[:5]
+    # children = []
+    for dfRow in df:
+        tableRow = html.Tr(
+            [
+                html.Td(dfRow["col_name"]),
+                html.Td(dfRow["feature_importance_vals"]),
+            ]
+        )
+        div_children.append(tableRow)
+
+    return div_children
+
+
 @cache.memoize(timeout=TIMEOUT)
 def get_dependence_plot(df, col):
     fig = px.scatter(

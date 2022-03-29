@@ -118,7 +118,7 @@ layout = html.Div(
                         id="line_graph",
                         # style={"height": "50vh", "width": "70vh"},
                         figure=blank_figure(),
-                        style={"height": "45vh"},
+                        style={"height": "35vh"},
                     ),
                     width=12,
                 ),
