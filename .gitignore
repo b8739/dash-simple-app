@@ -6,3 +6,4 @@ __pycache__
 !.elasticbeanstalk/*.global.yml
 cache-directory/*
 file_system_store/*
+__pycache__

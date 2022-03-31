@@ -228,8 +228,7 @@ def changeTag(
     Input("anomaly_store", "data"),
 )
 def changeTag(tag, anomaly_store):
-    print(tag)
-    print(anomaly_store)
+
     if anomaly_store[tag] == False:
         return "rgba(0, 234, 100, 1.0)"
     else:
