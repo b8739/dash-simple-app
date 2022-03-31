@@ -20,53 +20,9 @@ from sklearn.svm import SVR
 from sklearn.ensemble import RandomForestRegressor
 from utils.constants import algorithm_type
 from sklearn.preprocessing import StandardScaler
-from logic.prepare_data import to_dataframe
 from dash_extensions.enrich import Dash, Trigger, ServersideOutput
 from sklearn.model_selection import train_test_split
 from dash.exceptions import PreventUpdate
-
-
-@application.callback(
-    ServersideOutput("initial_store", "data"),
-    Input("x_y_store", "data"),
-)
-@cache.memoize(timeout=TIMEOUT)
-def initial_data(x_y_store):  # split_dataset
-
-    X, y = to_dataframe(x_y_store["X"]), pd.Series(x_y_store["y"])
-
-    ## SET 'TRAIN', 'TEST' DATA, TRAIN/TEST RATIO, & 'WAY OF RANDOM SAMPLING' ##
-    X_train, X_test, train_y, test_y = train_test_split(
-        X, y, test_size=0.2, random_state=12345
-    )
-
-    # X_train, X_test, train_y, test_y = train_test_split(X, y, test_size = 0.2, random_state = 56789)
-
-    train_x = X_train.drop(["date"], axis=1)  # Delete 'date' column from train data
-    test_x = X_test.drop(["date"], axis=1)  # Delete 'date' column from test data
-
-    # scalerX = MinMaxScaler()
-    scalerX = StandardScaler()  # Data standardization (to Standard Normal distribution)
-    # scalerX = RobustScaler()
-    scalerX.fit(train_x)
-    train_Xn = scalerX.transform(train_x)  # Scaling the train data
-    test_Xn = scalerX.transform(test_x)  # Scaling the test data
-
-    # train_b = scalerX.inverse_transform(train_Xn)
-    dict_values = {
-        # df
-        "train_x": train_x,
-        "test_x": test_x,
-        "X_test": X_test,
-        # numpy
-        "train_Xn": train_Xn,
-        "test_Xn": test_Xn,
-        # series
-        "train_y": train_y,
-        "test_y": test_y,
-    }
-
-    return dict_values
 
 
 """ CREATE MODEL """
@@ -75,10 +31,13 @@ def initial_data(x_y_store):  # split_dataset
 @application.callback(
     ServersideOutput("model_store", "data"),
     Input("initial_store", "data"),
+    State("model_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def create_model(initial_store):
-
+def create_model(initial_store, model_store):
+    # if model_store:
+    #     raise PreventUpdate
+    # else:
     train_Xn, train_y = initial_store["train_Xn"], initial_store["train_y"]
     model = {}
     # model = None
@@ -130,9 +89,7 @@ def get_modeling_result(model_store, initial_store):
     # 모델 만들고 실행
     model = model_store
     for i in algorithm_type:
-        result = algorithm.run(
-            i, model[i], initial_store["test_Xn"], initial_store["test_y"]
-        )
+        result = model["xgb"].predict(initial_store["test_Xn"])
         # 대푯값 비교해서 최소값으로 갱신
         # if rep_prediction["value"] > result["RMSE"]:
         #     rep_prediction = result
@@ -142,8 +99,20 @@ def get_modeling_result(model_store, initial_store):
     return rep_prediction
 
 
-""" GET MODELING ASSESSMENT """
+@application.callback(
+    Output("modeling_assessment_store", "data"),
+    Input("modeling_result_store", "data"),
+    State("initial_store", "data"),
+)
+@cache.memoize(timeout=TIMEOUT)
+def get_evaluation(modeling_result_store, initial_store):
+    evaluation = algorithm.evaluate_model(
+        "xgb", modeling_result_store, initial_store["test_y"]
+    )
+    return evaluation
 
+
+""" GET MODELING ASSESSMENT """
 
 # @cache.memoize(timeout=TIMEOUT)
 # def get_modeling_assessment():
@@ -182,13 +151,13 @@ def get_modeling_result(model_store, initial_store):
 
 
 def create_callback(output):
-    def get_modeling_assessment(modeling_result_store):
+    def get_modeling_assessment(modeling_assessment_store):
         if output == "MAPE_Value":
-            value = modeling_result_store["MAPE_Value"]
+            value = modeling_assessment_store["MAPE_Value"]
         elif output == "R_square_XGB":
-            value = modeling_result_store["R_square_XGB"]
+            value = modeling_assessment_store["R_square_XGB"]
         elif output == "RMSE":
-            value = modeling_result_store["RMSE"]
+            value = modeling_assessment_store["RMSE"]
         return round(value, 3)
 
     return get_modeling_assessment
@@ -197,7 +166,7 @@ def create_callback(output):
 for i in ["MAPE_Value", "RMSE"]:
     application.callback(
         Output(i, "value"),
-        Input("modeling_result_store", "data"),
+        Input("modeling_assessment_store", "data"),
     )(create_callback(i))
 
 
@@ -217,28 +186,18 @@ def update_predict_value(data_idx, df_veri, initial_store, model_store):
     if not data_idx:
         return 28485
     veri_idx = int(data_idx) - 1
-    df_veri.reset_index(drop=True, inplace=True)
-
-    veri_x = df_veri.drop(
-        ["date", "Biogas_prod"], axis=1
-    )  # Take All the columns except 'Biogas_prod'
-    veri_y = df_veri["Biogas_prod"]
-
-    scalerX = StandardScaler()  # Data standardization (to Standard Normal distribution)
-
-    scalerX.fit(initial_store["train_x"])
-
-    veri_Xn = scalerX.transform(veri_x)  # Scaling the verifying data
 
     model = model_store
-    xgb_veri_predict = model["xgb"].predict(veri_Xn[veri_idx].reshape(-1, 26))
+    xgb_veri_predict = model["xgb"].predict(
+        initial_store["veri_Xn"][veri_idx].reshape(-1, 26)
+    )
     xgb_veri_predict = xgb_veri_predict.round(0)
 
     # Results
     print("XGB_Pred = ", xgb_veri_predict)
     # print("RF_Pred = ", rf_veri_predict)
     # print("SVR_Pred = ", svr_veri_predict)
-    print("Actual = ", veri_y[veri_idx])
+    print("Actual = ", initial_store["veri_y"][veri_idx])
 
     return xgb_veri_predict
 
@@ -258,10 +217,9 @@ def save_actual_predictive_df(modeling_result_store, initial_store):
     result_df = algorithm.get_actual_predictive(
         initial_store["X_test"],
         initial_store["test_y"],
-        modeling_result_store["prediction"],
+        modeling_result_store,
     )
     result_df_dict = result_df.to_dict("records")
-    print("Actual Predictive Data 저장 완료")
     return result_df_dict
 
 
@@ -283,8 +241,8 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#08a4a7",
-            marker=dict(size=5),
+            line_color="#f1444c",
+            marker=dict(size=0.1),
         ),
         go.Scatter(
             name="Predictive",
@@ -293,23 +251,27 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#f1444c",
-            marker=dict(size=0.3),
+            line_color="#08a4a7",
+            marker=dict(size=4),
         ),
     ]
 
     fig = go.Figure(data=trace_list)
+    fig.update_layout(template="plotly_dark")
 
     fig.update_layout(
         title={
-            "text": "Actual vs Predict",
+            "text": "바이오가스 생산량 예측값 실제값 비교",
             "y": 0.9,
             "x": 0.5,
             "xanchor": "center",
             "yanchor": "top",
             # "font": {"size": 10},
-        }
+        },
+        paper_bgcolor="#32383e",
+        plot_bgcolor="#32383e",
     )
-
-    fig.update_layout(template="plotly_dark")
+    fig.update_xaxes(showgrid=True, gridcolor="#696969")
+    fig.update_yaxes(showgrid=True, gridcolor="#696969")
+    # fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor="#18191A")
     return fig

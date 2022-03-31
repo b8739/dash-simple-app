@@ -33,7 +33,7 @@ def plotMonitoringGraphs(graph_type, graph_number):
             dbc.Col(
                 [
                     daq.Indicator(
-                        id="indicator",
+                        id={"type": "indicator", "index": idx},
                         color=theme["primary"],
                         value="Normal",
                         className="dark-theme-control",
@@ -41,7 +41,7 @@ def plotMonitoringGraphs(graph_type, graph_number):
                             "display": "inline-block",
                             "position": "absolute",
                             "zIndex": 1,
-                            "top": 33,
+                            "top": 30,
                             "left": 40,
                         },
                     ),
@@ -153,6 +153,11 @@ contents = dbc.Col(
         children=[
             dbc.Row(
                 [
+                    html.Button(
+                        "아무 역할 없지만 데이터 불러오기 위해서 있어야 하는 버튼",
+                        id="btn_3",
+                        style={"display": "none"},
+                    ),
                     dbc.Col(
                         [
                             html.H5("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
@@ -164,13 +169,15 @@ contents = dbc.Col(
                             html.Span(
                                 # isNormal(idx)["state"],
                                 "Normal  ",
+                                id="normal_all_span",
                                 style={
                                     "marginRight": 10,
                                     "textAlign": "center",
+                                    "color": "white",
                                 },
                             ),
                             daq.Indicator(
-                                id="indicator",
+                                id="normal_all_indicator",
                                 color=theme["primary"],
                                 value="Normal",
                                 className="dark-theme-control",
@@ -180,6 +187,7 @@ contents = dbc.Col(
                             html.Span(
                                 # isNormal(idx)["state"],
                                 "Abnormal",
+                                id="abnormal_all_span",
                                 style={
                                     "marginLeft": 20,
                                     "marginRight": 10,
@@ -188,7 +196,7 @@ contents = dbc.Col(
                                 },
                             ),
                             daq.Indicator(
-                                id="indicator2",
+                                id="abnormal_all_indicator",
                                 color="rgba(255, 0, 0, 0.1)",
                                 # color="grey",
                                 value="Abnormal",

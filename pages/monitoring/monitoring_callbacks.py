@@ -93,7 +93,7 @@ def changeTag(
             #     "font": {"size": 15}
             #     # "y": 0.5,
             # },
-            margin=dict(l=70, r=70, t=70, b=90, pad=20),
+            margin=dict(l=35, r=35, t=30, b=30, pad=20),
             # pad=dict(l=100, r=100, t=30, b=100),
         )
         " " " Quantile 표시 " " "
@@ -195,7 +195,7 @@ def changeTag(
                     showactive=True,
                     font=dict(size=15),
                     x=0.55,
-                    y=1.8,  # 내릴수록 내려감
+                    y=1.7,  # 내릴수록 내려감
                     xanchor="center",
                     yanchor="top",
                     bordercolor="white",
@@ -223,11 +223,14 @@ def changeTag(
 
 
 @application.callback(
-    Output("dropdowns-collapse", "is_open"),
-    [Input("collapse_btn", "n_clicks")],
-    [State("dropdowns-collapse", "is_open")],
+    Output({"type": "indicator", "index": MATCH}, "color"),
+    Input({"type": "tagDropdown", "index": MATCH}, "value"),
+    Input("anomaly_store", "data"),
 )
-def toggle_dropdown(collapse_btn, is_open):
-    if collapse_btn:
-        return not is_open
-    return is_open
+def changeTag(tag, anomaly_store):
+    print(tag)
+    print(anomaly_store)
+    if anomaly_store[tag] == False:
+        return "rgba(0, 234, 100, 1.0)"
+    else:
+        return "rgba(255, 0, 0)"

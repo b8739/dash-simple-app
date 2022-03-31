@@ -50,8 +50,7 @@ def create_model(algorithm, train_Xn, train_y):
     return model
 
 
-def run(algorithm, model, test_Xn, test_y):
-    model_predict = model.predict(test_Xn)
+def evaluate_model(algorithm, model_predict, test_y):
     RMSE = mean_squared_error(test_y, model_predict) ** 0.5
     print(algorithm)
 
@@ -63,7 +62,6 @@ def run(algorithm, model, test_Xn, test_y):
         print("RMSE: ", RMSE)
         print("MAPE: ", MAPE(test_y, model_predict))
         return {
-            "prediction": model_predict,
             "RMSE": RMSE,
             "R_square_XGB": R_square_XGB,
             "MAPE_Value": MAPE_Value,
@@ -71,7 +69,7 @@ def run(algorithm, model, test_Xn, test_y):
     elif algorithm == "svr":
         print("RMSE: ", RMSE)
         print("MAPE: ", MAPE(test_y, model_predict))
-        return {"prediction": model_predict, "RMSE": RMSE}
+        return {"RMSE": RMSE}
 
 
 def get_actual_predictive(x1, y_act, y_pred):
