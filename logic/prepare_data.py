@@ -43,22 +43,6 @@ def preprocess(df):
     return df
 
 
-""" VERI DATASET """
-# 아직 veri idx를 어떻게 받아서 처리할지 반영 안함
-@application.callback(
-    ServersideOutput("df_veri_store", "data"),
-    Trigger("btn_3", "n_clicks"),
-)
-@cache.memoize(timeout=TIMEOUT)
-def extract_veri():
-    df = excel_to_df()
-    df = preprocess(df)
-    df_veri = df.iloc[
-        1022:1029:,
-    ].copy()  # Data for Verifying (TTA Test)
-    return df_veri
-
-
 ## For Verification Data : TTA 테스트 데이터 (7개)
 
 
@@ -67,9 +51,9 @@ def extract_veri():
 
 @application.callback(
     ServersideOutput("df_store", "data"),
-    [Input("veri_dropdown", "value")],
-    [State("df_store", "data")],
-    [State("df_veri_store", "data")],
+    Input("veri_dropdown", "value"),
+    State("df_store", "data"),
+    State("df_veri_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
 def extract_train_test(dropdown_value, df_store, df_veri_store):
@@ -87,10 +71,29 @@ def extract_train_test(dropdown_value, df_store, df_veri_store):
         df.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
         return df
     else:
+        print(df_veri_store)
         new_df = pd.concat(
             [df_store, df_veri_store[:dropdown_value]], ignore_index=True
         )
         return new_df
+
+
+""" VERI DATASET """
+# 아직 veri idx를 어떻게 받아서 처리할지 반영 안함
+@application.callback(
+    ServersideOutput("df_veri_store", "data"),
+    Input("btn_3", "n_clicks"),
+)
+@cache.memoize(timeout=TIMEOUT)
+def extract_veri(n_clicks):
+    print("extract_veri")
+    df = excel_to_df()
+    df = preprocess(df)
+    df_veri = df.iloc[
+        1022:1029:,
+    ].copy()  # Data for Verifying (TTA Test)
+    print(df_veri)
+    return df_veri
 
 
 """ AVG_STORE """

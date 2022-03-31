@@ -108,11 +108,6 @@ layout = html.Div(
         html.Br(),
         dbc.Row(
             [
-                html.Button(
-                    "아무 역할 없지만 데이터 불러오기 위해서 있어야 하는 버튼",
-                    id="btn_3",
-                    style={"display": "none"},
-                ),
                 dbc.Col(
                     dcc.Graph(
                         id="line_graph",

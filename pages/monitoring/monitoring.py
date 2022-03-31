@@ -153,6 +153,11 @@ contents = dbc.Col(
         children=[
             dbc.Row(
                 [
+                    html.Button(
+                        "아무 역할 없지만 데이터 불러오기 위해서 있어야 하는 버튼",
+                        id="btn_3",
+                        style={"display": "none"},
+                    ),
                     dbc.Col(
                         [
                             html.H5("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
