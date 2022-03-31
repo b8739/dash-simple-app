@@ -41,7 +41,7 @@ def plotMonitoringGraphs(graph_type, graph_number):
                             "display": "inline-block",
                             "position": "absolute",
                             "zIndex": 1,
-                            "top": 33,
+                            "top": 30,
                             "left": 40,
                         },
                     ),

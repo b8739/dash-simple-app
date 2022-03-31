@@ -93,7 +93,7 @@ def changeTag(
             #     "font": {"size": 15}
             #     # "y": 0.5,
             # },
-            margin=dict(l=70, r=70, t=70, b=90, pad=20),
+            margin=dict(l=35, r=35, t=30, b=30, pad=20),
             # pad=dict(l=100, r=100, t=30, b=100),
         )
         " " " Quantile 표시 " " "
@@ -195,7 +195,7 @@ def changeTag(
                     showactive=True,
                     font=dict(size=15),
                     x=0.55,
-                    y=1.8,  # 내릴수록 내려감
+                    y=1.7,  # 내릴수록 내려감
                     xanchor="center",
                     yanchor="top",
                     bordercolor="white",

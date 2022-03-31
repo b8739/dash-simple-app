@@ -35,40 +35,40 @@ from dash.exceptions import PreventUpdate
 )
 @cache.memoize(timeout=TIMEOUT)
 def create_model(initial_store, model_store):
-    if model_store:
-        raise PreventUpdate
-    else:
-        train_Xn, train_y = initial_store["train_Xn"], initial_store["train_y"]
-        model = {}
-        # model = None
-        model["xgb"] = xgb.XGBRegressor(
-            n_estimators=1800,
-            learning_rate=0.01,
-            gamma=0.1,
-            eta=0.04,
-            subsample=0.75,
-            colsample_bytree=0.5,
-            max_depth=7,
-        )
-        model["xgb"].fit(train_Xn, train_y)
+    # if model_store:
+    #     raise PreventUpdate
+    # else:
+    train_Xn, train_y = initial_store["train_Xn"], initial_store["train_y"]
+    model = {}
+    # model = None
+    model["xgb"] = xgb.XGBRegressor(
+        n_estimators=1800,
+        learning_rate=0.01,
+        gamma=0.1,
+        eta=0.04,
+        subsample=0.75,
+        colsample_bytree=0.5,
+        max_depth=7,
+    )
+    model["xgb"].fit(train_Xn, train_y)
 
-        model["svr"] = SVR(
-            kernel="rbf",
-            C=100000,
-            epsilon=0.9,
-            gamma=0.0025,
-            cache_size=200,
-            coef0=0.0,
-            degree=3,
-            max_iter=-1,
-            tol=0.0001,
-        )
-        model["svr"].fit(train_Xn, train_y)
+    model["svr"] = SVR(
+        kernel="rbf",
+        C=100000,
+        epsilon=0.9,
+        gamma=0.0025,
+        cache_size=200,
+        coef0=0.0,
+        degree=3,
+        max_iter=-1,
+        tol=0.0001,
+    )
+    model["svr"].fit(train_Xn, train_y)
 
-        model["rf"] = RandomForestRegressor(n_estimators=400, min_samples_split=3)
-        model["rf"].fit(train_Xn, train_y)
+    model["rf"] = RandomForestRegressor(n_estimators=400, min_samples_split=3)
+    model["rf"].fit(train_Xn, train_y)
 
-        return model
+    return model
 
 
 """ GET MODELING RESULT"""
@@ -186,28 +186,18 @@ def update_predict_value(data_idx, df_veri, initial_store, model_store):
     if not data_idx:
         return 28485
     veri_idx = int(data_idx) - 1
-    df_veri.reset_index(drop=True, inplace=True)
-
-    veri_x = df_veri.drop(
-        ["date", "Biogas_prod"], axis=1
-    )  # Take All the columns except 'Biogas_prod'
-    veri_y = df_veri["Biogas_prod"]
-
-    scalerX = StandardScaler()  # Data standardization (to Standard Normal distribution)
-
-    scalerX.fit(initial_store["train_x"])
-
-    veri_Xn = scalerX.transform(veri_x)  # Scaling the verifying data
 
     model = model_store
-    xgb_veri_predict = model["xgb"].predict(veri_Xn[veri_idx].reshape(-1, 26))
+    xgb_veri_predict = model["xgb"].predict(
+        initial_store["veri_Xn"][veri_idx].reshape(-1, 26)
+    )
     xgb_veri_predict = xgb_veri_predict.round(0)
 
     # Results
     print("XGB_Pred = ", xgb_veri_predict)
     # print("RF_Pred = ", rf_veri_predict)
     # print("SVR_Pred = ", svr_veri_predict)
-    print("Actual = ", veri_y[veri_idx])
+    print("Actual = ", initial_store["veri_y"][veri_idx])
 
     return xgb_veri_predict
 

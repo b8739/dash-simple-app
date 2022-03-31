@@ -71,7 +71,6 @@ def extract_train_test(dropdown_value, df_store, df_veri_store):
         df.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
         return df
     else:
-        print(df_veri_store)
         new_df = pd.concat(
             [df_store, df_veri_store[:dropdown_value]], ignore_index=True
         )
@@ -86,13 +85,12 @@ def extract_train_test(dropdown_value, df_store, df_veri_store):
 )
 @cache.memoize(timeout=TIMEOUT)
 def extract_veri(n_clicks):
-    print("extract_veri")
     df = excel_to_df()
     df = preprocess(df)
     df_veri = df.iloc[
         1022:1029:,
     ].copy()  # Data for Verifying (TTA Test)
-    print(df_veri)
+    df_veri.reset_index(drop=True, inplace=True)
     return df_veri
 
 
@@ -122,16 +120,17 @@ def get_xy(df):
     return {"X": X, "y": y}
 
 
-""" INITIAL STORE (TRAIN & TEST)"""
-
-
 @application.callback(
     ServersideOutput("initial_store", "data"),
     Input("x_y_store", "data"),
+    State("df_veri_store", "data"),
+    State("initial_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def initial_data(x_y_store):  # split_dataset
+def initial_data(x_y_store, df_veri_store, initial_store):  # split_dataset
+    scalerX = StandardScaler()  # Data standardization (to Standard Normal distribution)
 
+    # if type(initial_store) is not dict:
     X, y = x_y_store["X"], x_y_store["y"]
 
     ## SET 'TRAIN', 'TEST' DATA, TRAIN/TEST RATIO, & 'WAY OF RANDOM SAMPLING' ##
@@ -145,12 +144,16 @@ def initial_data(x_y_store):  # split_dataset
     test_x = X_test.drop(["date"], axis=1)  # Delete 'date' column from test data
 
     # scalerX = MinMaxScaler()
-    scalerX = StandardScaler()  # Data standardization (to Standard Normal distribution)
     # scalerX = RobustScaler()
     scalerX.fit(train_x)
     train_Xn = scalerX.transform(train_x)  # Scaling the train data
     test_Xn = scalerX.transform(test_x)  # Scaling the test data
-
+    # verification data
+    veri_x = df_veri_store.drop(
+        ["date", "Biogas_prod"], axis=1
+    )  # Take All the columns except 'Biogas_prod'
+    veri_y = df_veri_store["Biogas_prod"]
+    veri_Xn = scalerX.transform(veri_x)  # Scaling the verifying data
     # train_b = scalerX.inverse_transform(train_Xn)
     dict_values = {
         # df
@@ -163,24 +166,37 @@ def initial_data(x_y_store):  # split_dataset
         # series
         "train_y": train_y,
         "test_y": test_y,
+        # verification
+        "veri_x": veri_x,
+        "veri_y": veri_y,
+        "veri_Xn": veri_Xn,
     }
 
     return dict_values
+    # else:
+    #     scalerX.fit(initial_store["train_x"])
+    #     train_Xn = scalerX.transform(initial_store["train_x"])  # Scaling the train data
+    #     new_train_Xn = np.concatenate((train_Xn, initial_store["veri_Xn"]), axis=0)
+    #     initial_store["train_Xn"] = new_train_Xn
+    #     return initial_store
 
 
 """ANOMALY DETECTION"""
+from collections import defaultdict
 
 # 아직 veri idx를 어떻게 받아서 처리할지 반영 안함
 @application.callback(
-    Output("anomaly_store", "data"),
+    ServersideOutput("anomaly_store", "data"),
     Input("x_y_store", "data"),
     State("veri_dropdown", "value"),
     State("df_veri_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
 def anomaly_detect(x_y_store, dropdown_value, df_veri_store):
+    anomaly_df = pd.Series(index=x_y_store["X"].columns, data=False)
+    anomaly_df["general"] = False
     if not dropdown_value:
-        return "normal"
+        return anomaly_df
     else:
         """TRAIN TEST SPLIT"""
         X_train_0, X_test_0, train_y, test_y = train_test_split(
@@ -206,11 +222,34 @@ def anomaly_detect(x_y_store, dropdown_value, df_veri_store):
             pd.DataFrame(X_veri.iloc[(dropdown_value - 1)]).T
         )
         print(a_scores_veri[0])
-        if a_scores_veri[0] >= 0.60:
-            return "abnormal"
-        else:
-            return "normal"
 
+        if a_scores_veri[0] >= 0.60:
+            anomaly_df["general"] = True
+
+        else:
+            anomaly_df["general"] = False
+        """ 개별 Column 에 대한 anomaly"""
+        compare_train = pd.concat(
+            [
+                pd.Series(X_train.quantile(0.025)),
+                X_train.quantile(0.975),
+                pd.Series(
+                    X_train.iloc[
+                        479,
+                    ]
+                ),
+            ],
+            axis=1,
+        )
+        anomaly_where = np.where(
+            (compare_train[0.025] > compare_train[479.000])
+            | (compare_train[479.000] > compare_train[0.975])
+        )[0]
+
+        for i in anomaly_where:
+            anomaly_df[i] = True
+
+        return anomaly_df
         """DETECTION SINGLE"""
         # compare_train = pd.concat([pd.Series(X_train.quantile(0.025)), pd.Series(X_train.iloc[479, ])], axis=1)
 
@@ -230,7 +269,8 @@ def normal_span(anomaly_store):
         "marginRight": 10,
         "textAlign": "center",
     }
-    if anomaly_store == "normal":
+
+    if anomaly_store["general"] == False:
         default_style.update({"color": "white"})
 
     else:
@@ -248,7 +288,7 @@ def normal_span(anomaly_store):
 # rgba(0, 234, 100, 1.0)
 @cache.memoize(timeout=TIMEOUT)
 def normal_indicator(anomaly_store):
-    if anomaly_store == "normal":
+    if anomaly_store["general"] == False:
         return "rgba(0, 234, 100, 1.0)"
     else:
         return "rgba(0, 234, 100, 0.1)"
@@ -268,7 +308,7 @@ def abnormal_span(anomaly_store):
         "marginRight": 10,
         "textAlign": "center",
     }
-    if anomaly_store == "normal":
+    if anomaly_store["general"] == False:
         default_style.update({"color": "grey"})
 
     else:
@@ -286,7 +326,7 @@ def abnormal_span(anomaly_store):
 # rgba(0, 234, 100, 1.0)
 @cache.memoize(timeout=TIMEOUT)
 def abnormal_indicator(anomaly_store):
-    if anomaly_store == "normal":
+    if anomaly_store["general"] == False:
         return "rgba(255, 0, 0, 0.1)"
     else:
         return "rgba(255, 0, 0)"
