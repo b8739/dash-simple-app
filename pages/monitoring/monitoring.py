@@ -33,7 +33,7 @@ def plotMonitoringGraphs(graph_type, graph_number):
             dbc.Col(
                 [
                     daq.Indicator(
-                        id="indicator",
+                        id={"type": "indicator", "index": idx},
                         color=theme["primary"],
                         value="Normal",
                         className="dark-theme-control",

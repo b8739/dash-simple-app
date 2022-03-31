@@ -223,11 +223,14 @@ def changeTag(
 
 
 @application.callback(
-    Output("dropdowns-collapse", "is_open"),
-    [Input("collapse_btn", "n_clicks")],
-    [State("dropdowns-collapse", "is_open")],
+    Output({"type": "indicator", "index": MATCH}, "color"),
+    Input({"type": "tagDropdown", "index": MATCH}, "value"),
+    Input("anomaly_store", "data"),
 )
-def toggle_dropdown(collapse_btn, is_open):
-    if collapse_btn:
-        return not is_open
-    return is_open
+def changeTag(tag, anomaly_store):
+    print(tag)
+    print(anomaly_store)
+    if anomaly_store[tag] == False:
+        return "rgba(0, 234, 100, 1.0)"
+    else:
+        return "rgba(255, 0, 0)"

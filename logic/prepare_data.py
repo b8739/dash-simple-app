@@ -182,7 +182,6 @@ def initial_data(x_y_store, df_veri_store, initial_store):  # split_dataset
 
 
 """ANOMALY DETECTION"""
-from collections import defaultdict
 
 # 아직 veri idx를 어떻게 받아서 처리할지 반영 안함
 @application.callback(
