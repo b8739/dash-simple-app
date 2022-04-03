@@ -56,7 +56,7 @@ def changeTag(
 ):
     " " " Plotly Graph 생성 " " "
 
-    df = df.iloc[len(df) - 100 : 1022]
+    df = df.tail(100)
 
     if not tag:
         tag = df.columns[3]
@@ -68,8 +68,8 @@ def changeTag(
     finally:
         fig.update_traces(
             mode="markers+lines",
-            marker=dict(size=2, line=dict(width=2.5, color="#f4d44d")),
-            line=dict(color="#f4d44d", width=1),
+            marker=dict(size=1, line=dict(width=2.5, color="#f4d44d")),
+            line=dict(color="#f4d44d", width=0.5),
         ),
         # fig.update_layout(paper_bgcolor="#121212", plot_bgcolor="#121212")
         fig.update_yaxes(rangemode="normal")

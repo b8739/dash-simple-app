@@ -233,6 +233,9 @@ def save_actual_predictive_df(modeling_result_store, initial_store):
 @cache.memoize(timeout=TIMEOUT)
 def draw_actual_predict_graph(df):
     df = pd.json_normalize(df)
+    print(df)
+    df = df.tail(30)
+    print(df)
     trace_list = [
         go.Scatter(
             name="Actual",
