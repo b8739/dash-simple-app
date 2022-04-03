@@ -69,11 +69,18 @@ def extract_train_test(dropdown_value, df_store, df_veri_store):
         # df = df.iloc[:1022].copy()
         df = df.iloc[:1022].copy()
         df.dropna(axis=0, inplace=True)  # Delete entire rows which have the NAs
+        df.reset_index(drop=True, inplace=True)
         return df
     else:
+        df_store = df_store[:1013]
         new_df = pd.concat(
             [df_store, df_veri_store[:dropdown_value]], ignore_index=True
         )
+
+        # new_df = new_df.loc[~new_df.index.duplicated(keep="first")]
+
+        # print(new_df[-15:])
+        # 문제는 dropna를 하면서 index가 바뀌어버려서 df_store.iloc[:1022]를 하더라도 전체가 다 튀어나옴
         return new_df
 
 
@@ -247,7 +254,7 @@ def anomaly_detect(x_y_store, dropdown_value, df_veri_store):
 
         for i in anomaly_where:
             anomaly_df[i] = True
-
+        print(anomaly_df)
         return anomaly_df
         """DETECTION SINGLE"""
         # compare_train = pd.concat([pd.Series(X_train.quantile(0.025)), pd.Series(X_train.iloc[479, ])], axis=1)

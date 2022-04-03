@@ -108,7 +108,7 @@ def changeTag(
 
             fig.add_hline(
                 y=quantile_store[tag][q],
-                # line_dash="dot",
+                line_dash="dot",
                 line_color="white",
                 # line_width=0.5,
                 annotation_text=q,
@@ -165,7 +165,7 @@ def changeTag(
                                         ],
                                         "shapes": [
                                             {
-                                                "type": "line",
+                                                "type": "dot",
                                                 "x0": 0,
                                                 "y0": quantile_store[col][i],
                                                 "x1": 1,
@@ -227,7 +227,7 @@ def changeTag(
     Input({"type": "tagDropdown", "index": MATCH}, "value"),
     Input("anomaly_store", "data"),
 )
-def changeTag(tag, anomaly_store):
+def updateAnomaly(tag, anomaly_store):
 
     if anomaly_store[tag] == False:
         return "rgba(0, 234, 100, 1.0)"
