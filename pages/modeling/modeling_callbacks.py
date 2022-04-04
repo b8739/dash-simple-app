@@ -93,8 +93,10 @@ def create_model(initial_store, data_idx, model):
 )
 @cache.memoize(timeout=TIMEOUT)
 def update_predict_value(model, df_veri, initial_store, data_idx):
-    if not data_idx:
+    if data_idx == 0:
+        print("predict value", model["xgb"].predict(initial_store["test_Xn"]))
         return model["xgb"].predict(initial_store["test_Xn"])
+        # return 29487
     veri_idx = int(data_idx) - 1
 
     xgb_veri_predict = model["xgb"].predict(
@@ -246,7 +248,7 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#f1444c",
+            line_color="#f62e38",
             marker=dict(size=0.1),
         ),
         go.Scatter(
@@ -256,7 +258,7 @@ def draw_actual_predict_graph(df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#08a4a7",
+            line_color="#0abbbe",
             marker=dict(size=4),
         ),
     ]

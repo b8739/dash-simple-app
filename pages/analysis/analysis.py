@@ -35,8 +35,8 @@ layout = html.Div(
                                     hover=True,
                                     responsive=True,
                                     striped=True,
-                                    style={"height": "100%"},
-                                    size="sm",
+                                    # style={"height": "100%"},
+                                    # size="sm",
                                 )
                                 # dash_table.DataTable(
                                 #     id="influence_table",
@@ -56,7 +56,8 @@ layout = html.Div(
                                 #     },
                                 # )
                                 ,
-                                style={"height": "32vh"},
+                                # style={"height": "32vh"},
+                                width=4,
                             ),
                             dbc.Col(
                                 dcc.Graph(
@@ -64,14 +65,17 @@ layout = html.Div(
                                     figure=blank_figure(),
                                     style={"height": "100%"},
                                 ),
-                                style={"height": "32vh"},
+                                # style={"height": "32vh"},
+                                width=7,
                             ),
                         ],
+                        justify="evenly",
                     ),
                 ]
             ),
             className="mt-3",
         ),
+        html.Br(),
         dbc.Card(
             dbc.CardBody(
                 [

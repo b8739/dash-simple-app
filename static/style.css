@@ -20,3 +20,10 @@ hr {
   margin-top: 2rem;
   margin-bottom: 2rem;
 }
+#influence_table {
+  font-size: 1.2rem;
+}
+th:first-child:not(.CalendarDay),
+td:first-child:not(.CalendarDay) {
+  padding-left: 15px;
+}

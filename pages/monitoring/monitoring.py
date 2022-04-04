@@ -163,9 +163,29 @@ contents = dbc.Col(
                             html.H5("Biogas 플랜트 공정 운전 변수 모니터링 밎 이상 감지"),
                         ]
                     ),
-                    # Normal
+                    # 이상감지 indicator
+                    # dbc.Col(
+                    #     html.H6(
+                    #         "이상 감지 상태",
+                    #         style={
+                    #             "display": "inline",
+                    #         },
+                    #     ),
+                    #     style={
+                    #         "text-align": "right",
+                    #     },
+                    # ),
                     dbc.Col(
-                        [
+                        children=[
+                            html.H6(
+                                "이상 감지 상태:",
+                                style={
+                                    "display": "inline",
+                                    "marginRight": 15,
+                                    "font-size": "1.6rem",
+                                    "font-weight": "100",
+                                },
+                            ),
                             html.Span(
                                 # isNormal(idx)["state"],
                                 "Normal  ",
@@ -205,13 +225,8 @@ contents = dbc.Col(
                             ),
                         ],
                         style={
-                            "paddingTop": 8,
-                            "paddingRight": 10,
                             "textAlign": "right",
-                            # "marginTop": 15,
-                            "marginBottom": 15,
                         },
-                        width=4,
                     ),
                     html.Hr(),
                     dropdowns,
@@ -220,6 +235,7 @@ contents = dbc.Col(
                     ),
                 ],
                 justify="between",
+                align="center",
             ),
         ],
         id="monitor-loading",

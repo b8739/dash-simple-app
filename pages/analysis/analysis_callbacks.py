@@ -130,7 +130,7 @@ def get_dependence_plot(df, col):
         template="plotly_dark",
     )
     fig.update_traces(
-        mode="markers", marker=dict(size=0.5, line=dict(width=2, color="#f4d44d"))
+        mode="markers", marker=dict(size=0.3, line=dict(width=2, color="#f4d44d"))
     ),
     fig.update_layout(
         title={

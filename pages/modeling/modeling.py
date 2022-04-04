@@ -62,7 +62,6 @@ layout = html.Div(
                                         labelPosition="bottom",
                                         color="#fcdc64",
                                         size=32,
-                                        value=0,
                                     ),
                                 ]
                             ),

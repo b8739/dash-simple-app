@@ -113,7 +113,7 @@ def changeTag(
                 # line_width=0.5,
                 annotation_text=q,
                 annotation_position="right",
-                opacity=0.55,
+                opacity=0.5,
             )
 
         " " " Average 표시 " " "
@@ -177,7 +177,7 @@ def changeTag(
                                                     "width": 1,
                                                     # "dash": "dot",
                                                 },
-                                                "opacity": 0.55,
+                                                "opacity": 0.5,
                                             }
                                             for i in ["Q1", "Q3"]
                                         ],
