@@ -79,6 +79,7 @@ def get_actual_predictive(x1, y_act, y_pred):
     z1 = z1.reset_index(drop=True)
     z2 = pd.DataFrame(y_pred)
     result = pd.concat([z0, z1, z2], axis=1)
+    print("result", result)
     result.columns = ["date", "Actual", "Predictive"]
     result = result.sort_values(by=["date"], axis=0, ascending=True)
     # result = result.set_index("date")

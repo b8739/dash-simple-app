@@ -31,122 +31,133 @@ from dash.exceptions import PreventUpdate
 @application.callback(
     ServersideOutput("model_store", "data"),
     Input("initial_store", "data"),
+    State("veri_dropdown", "value"),
     State("model_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def create_model(initial_store, model_store):
-    # if model_store:
-    #     raise PreventUpdate
-    # else:
-    train_Xn, train_y = initial_store["train_Xn"], initial_store["train_y"]
-    model = {}
-    # model = None
-    model["xgb"] = xgb.XGBRegressor(
-        n_estimators=1800,
-        learning_rate=0.01,
-        gamma=0.1,
-        eta=0.04,
-        subsample=0.75,
-        colsample_bytree=0.5,
-        max_depth=7,
+def create_model(initial_store, data_idx, model):
+    train_Xn, train_y = (
+        initial_store["train_Xn"],
+        initial_store["train_y"],
     )
-    model["xgb"].fit(train_Xn, train_y)
 
-    model["svr"] = SVR(
-        kernel="rbf",
-        C=100000,
-        epsilon=0.9,
-        gamma=0.0025,
-        cache_size=200,
-        coef0=0.0,
-        degree=3,
-        max_iter=-1,
-        tol=0.0001,
-    )
-    model["svr"].fit(train_Xn, train_y)
+    if data_idx == 0 or not data_idx:
+        # if model_store:
+        #     raise PreventUpdate
+        # else:
+        model = {}
+        # model = None
+        model["xgb"] = xgb.XGBRegressor(
+            n_estimators=1800,
+            learning_rate=0.01,
+            gamma=0.1,
+            eta=0.04,
+            subsample=0.75,
+            colsample_bytree=0.5,
+            max_depth=7,
+        )
+        model["xgb"].fit(train_Xn, train_y)
 
-    model["rf"] = RandomForestRegressor(n_estimators=400, min_samples_split=3)
-    model["rf"].fit(train_Xn, train_y)
+        model["svr"] = SVR(
+            kernel="rbf",
+            C=100000,
+            epsilon=0.9,
+            gamma=0.0025,
+            cache_size=200,
+            coef0=0.0,
+            degree=3,
+            max_iter=-1,
+            tol=0.0001,
+        )
+        model["svr"].fit(train_Xn, train_y)
 
+        model["rf"] = RandomForestRegressor(n_estimators=400, min_samples_split=3)
+        model["rf"].fit(train_Xn, train_y)
+    else:
+        # Updating Training Data
+        # XGB
+        model["xgb"].fit(train_Xn, train_y)
     return model
+
+
+""" GET PREDICTED RESULT """
+
+
+@application.callback(
+    Output("predict_value", "value"),
+    Input("model_store", "data"),
+    State("df_veri_store", "data"),
+    State("initial_store", "data"),
+    State("veri_dropdown", "value"),
+    # prevent_initial_call=True,
+)
+@cache.memoize(timeout=TIMEOUT)
+def update_predict_value(model, df_veri, initial_store, data_idx):
+    if not data_idx:
+        return model["xgb"].predict(initial_store["test_Xn"])
+    veri_idx = int(data_idx) - 1
+
+    xgb_veri_predict = model["xgb"].predict(
+        initial_store["veri_Xn"][veri_idx].reshape(-1, 26)
+    )
+    # xgb_veri_predict = xgb_veri_predict.round(0)
+    xgb_veri_predict = xgb_veri_predict.round(0)
+
+    # Results
+    # print("XGB_Pred = ", xgb_veri_predict)
+    # print("RF_Pred = ", rf_veri_predict)
+    # print("SVR_Pred = ", svr_veri_predict)
+    # print("Actual = ", initial_store["veri_y"][veri_idx])
+
+    return xgb_veri_predict
 
 
 """ GET MODELING RESULT"""
 
 
-@application.callback(
-    Output("modeling_result_store", "data"),
-    Input("model_store", "data"),
-    State("initial_store", "data"),
-)
-@cache.memoize(timeout=TIMEOUT)
-def get_modeling_result(model_store, initial_store):
+# @application.callback(
+#     Output("modeling_result_store", "data"),
+#     Input("model_store", "data"),
+#     State("initial_store", "data"),
+# )
+# @cache.memoize(timeout=TIMEOUT)
+# def get_modeling_result(model_store, initial_store):
 
-    # 모델링 실행
-    rep_prediction = {"value": math.inf}
+#     # 모델링 실행
+#     rep_prediction = {"value": math.inf}
 
-    """ Modeling """
-    # 모델 만들고 실행
-    model = model_store
-    for i in algorithm_type:
-        result = model["xgb"].predict(initial_store["test_Xn"])
-        # 대푯값 비교해서 최소값으로 갱신
-        # if rep_prediction["value"] > result["RMSE"]:
-        #     rep_prediction = result
-        if i == "xgb":
-            rep_prediction = result
+#     """ Modeling """
+#     # 모델 만들고 실행
+#     model = model_store
+#     for i in algorithm_type:
+#         result = model["xgb"].predict(initial_store["test_Xn"])
+#         # 대푯값 비교해서 최소값으로 갱신
+#         # if rep_prediction["value"] > result["RMSE"]:
+#         #     rep_prediction = result
+#         if i == "xgb":
+#             rep_prediction = result
 
-    return rep_prediction
+#     return rep_prediction
 
 
 @application.callback(
     Output("modeling_assessment_store", "data"),
-    Input("modeling_result_store", "data"),
+    Input("predict_value", "value"),
+    State("model_store", "data"),
     State("initial_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def get_evaluation(modeling_result_store, initial_store):
+def get_evaluation(predict_value, model, initial_store):
+    # print(len(predict_value))
+    # print(len(initial_store["test_y"]))
+    xgb_model_predict = model["xgb"].predict(initial_store["test_Xn"])
     evaluation = algorithm.evaluate_model(
-        "xgb", modeling_result_store, initial_store["test_y"]
+        "xgb", xgb_model_predict, initial_store["test_y"]
     )
     return evaluation
 
 
 """ GET MODELING ASSESSMENT """
-
-# @cache.memoize(timeout=TIMEOUT)
-# def get_modeling_assessment():
-#     rep_prediction = get_modeling_result()
-#     assessment = ["MAPE_Value", "R_square_XGB", "RMSE"]
-#     # assessment = ["MAPE_Value", "RMSE"]
-#     print("Modeling 평가 결과 저장 완료")
-#     return [
-#         dbc.Col(
-#             daq.LEDDisplay(
-#                 id="our-LED-display",
-#                 label=i,
-#                 labelPosition="bottom",
-#                 value=round(rep_prediction[i], 3),
-#                 color="#fcdc64",
-#                 size=18,
-#             ),
-#             # width=3,
-#         )
-#         for i in assessment
-#     ]
-
-
-# @application.callback(
-#     Output("loading-output-1", "children"),
-#     Input("veri_dropdown", "value"),
-#     State("modeling_result_store", "data"),
-# )
-# def input_triggers_spinner(value, modeling_result_store):
-#     print(modeling_result_store)
-#     time.sleep(5)
-#     return value
-
-
 """ Assessment"""
 
 
@@ -170,57 +181,51 @@ for i in ["MAPE_Value", "RMSE"]:
     )(create_callback(i))
 
 
-""" GET PREDICTED RESULT """
-
-
-@application.callback(
-    Output("predict_value", "value"),
-    Input("veri_dropdown", "value"),
-    State("df_veri_store", "data"),
-    State("initial_store", "data"),
-    State("model_store", "data"),
-    # prevent_initial_call=True,
-)
-@cache.memoize(timeout=TIMEOUT)
-def update_predict_value(data_idx, df_veri, initial_store, model_store):
-    if not data_idx:
-        return 28485
-    veri_idx = int(data_idx) - 1
-
-    model = model_store
-    xgb_veri_predict = model["xgb"].predict(
-        initial_store["veri_Xn"][veri_idx].reshape(-1, 26)
-    )
-    xgb_veri_predict = xgb_veri_predict.round(0)
-
-    # Results
-    print("XGB_Pred = ", xgb_veri_predict)
-    # print("RF_Pred = ", rf_veri_predict)
-    # print("SVR_Pred = ", svr_veri_predict)
-    print("Actual = ", initial_store["veri_y"][veri_idx])
-
-    return xgb_veri_predict
-
-
 """ SAVE ACTUAL PREDICTIVE STORE"""
 
 
 @application.callback(
-    Output("actual_predict_store", "data"),
-    Input("modeling_result_store", "data"),
+    ServersideOutput("actual_predict_store", "data"),
+    Input("predict_value", "value"),
     State("initial_store", "data"),
+    State("actual_predict_store", "data"),
+    State("veri_dropdown", "value"),
+    State("df_veri_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def save_actual_predictive_df(modeling_result_store, initial_store):
+def save_actual_predictive_df(
+    predict_value, initial_store, actual_predict_store, dropdown, df_veri_store
+):
+    if len(predict_value) != 1:
+        print("predict_value", predict_value)
+        print("len(predict_value)", len(predict_value))
+        print("actual_predict_store", actual_predict_store)
+        """Actual Predictive"""
+        result_df = algorithm.get_actual_predictive(
+            initial_store["X_test"],
+            initial_store["test_y"],
+            predict_value,
+        )
+        # print(predict_value)
+        # result_df_dict = result_df.to_dict("records")
+        return result_df
+    else:
+        data_idx = dropdown - 1
 
-    """Actual Predictive"""
-    result_df = algorithm.get_actual_predictive(
-        initial_store["X_test"],
-        initial_store["test_y"],
-        modeling_result_store,
-    )
-    result_df_dict = result_df.to_dict("records")
-    return result_df_dict
+        new_date = df_veri_store.iloc[data_idx]["date"]
+        new_actual = initial_store["veri_y"].iloc[data_idx]
+        print("new_actual", new_actual)
+        print('initial_store["veri_y"]', initial_store["veri_y"])
+        actual_predict_store.loc[len(actual_predict_store)] = [
+            new_date,
+            new_actual,
+            predict_value[0],
+        ]
+        # print('new_date', new_date)
+        # print('new_actual', new_actual)
+        # print('predict_value', predict_value)
+        print("new actual_predict_store", actual_predict_store)
+        return actual_predict_store
 
 
 """ DRAW ACTUAL VS PREDICTIVE GRAPH"""
@@ -232,10 +237,7 @@ def save_actual_predictive_df(modeling_result_store, initial_store):
 )
 @cache.memoize(timeout=TIMEOUT)
 def draw_actual_predict_graph(df):
-    df = pd.json_normalize(df)
-    print(df)
     df = df.tail(30)
-    print(df)
     trace_list = [
         go.Scatter(
             name="Actual",

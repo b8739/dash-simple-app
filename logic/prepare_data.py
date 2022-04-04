@@ -131,61 +131,73 @@ def get_xy(df):
     ServersideOutput("initial_store", "data"),
     Input("x_y_store", "data"),
     State("df_veri_store", "data"),
+    State("veri_dropdown", "value"),
     State("initial_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def initial_data(x_y_store, df_veri_store, initial_store):  # split_dataset
+def initial_data(
+    x_y_store, df_veri_store, dropdown_value, initial_store
+):  # split_dataset
     scalerX = StandardScaler()  # Data standardization (to Standard Normal distribution)
 
     # if type(initial_store) is not dict:
     X, y = x_y_store["X"], x_y_store["y"]
+    if dropdown_value == 0 or not dropdown_value:
+        ## SET 'TRAIN', 'TEST' DATA, TRAIN/TEST RATIO, & 'WAY OF RANDOM SAMPLING' ##
+        X_train, X_test, train_y, test_y = train_test_split(
+            X, y, test_size=0.2, random_state=12345
+        )
 
-    ## SET 'TRAIN', 'TEST' DATA, TRAIN/TEST RATIO, & 'WAY OF RANDOM SAMPLING' ##
-    X_train, X_test, train_y, test_y = train_test_split(
-        X, y, test_size=0.2, random_state=12345
-    )
+        # X_train, X_test, train_y, test_y = train_test_split(X, y, test_size = 0.2, random_state = 56789)
 
-    # X_train, X_test, train_y, test_y = train_test_split(X, y, test_size = 0.2, random_state = 56789)
+        train_x = X_train.drop(["date"], axis=1)  # Delete 'date' column from train data
+        test_x = X_test.drop(["date"], axis=1)  # Delete 'date' column from test data
 
-    train_x = X_train.drop(["date"], axis=1)  # Delete 'date' column from train data
-    test_x = X_test.drop(["date"], axis=1)  # Delete 'date' column from test data
+        # scalerX = MinMaxScaler()
+        # scalerX = RobustScaler()
+        scalerX.fit(train_x)
+        train_Xn = scalerX.transform(train_x)  # Scaling the train data
+        test_Xn = scalerX.transform(test_x)  # Scaling the test data
+        # verification data
+        veri_x = df_veri_store.drop(
+            ["date", "Biogas_prod"], axis=1
+        )  # Take All the columns except 'Biogas_prod'
+        veri_y = df_veri_store["Biogas_prod"]
+        veri_Xn = scalerX.transform(veri_x)  # Scaling the verifying data
+        # train_b = scalerX.inverse_transform(train_Xn)
+        dict_values = {
+            # df
+            "train_x": train_x,
+            "test_x": test_x,
+            "X_test": X_test,
+            # numpy
+            "train_Xn": train_Xn,
+            "test_Xn": test_Xn,
+            # series
+            "train_y": train_y,
+            "test_y": test_y,
+            # verification
+            "veri_x": veri_x,
+            "veri_y": veri_y,
+            "veri_Xn": veri_Xn,
+        }
+        # print("test_y", test_y)
+        # print('x_y_store["y"]', x_y_store["y"])
+        return dict_values
+    else:
+        train_Xn = initial_store["train_Xn"]
+        train_y = initial_store["train_y"]
+        veri_y = initial_store["veri_y"]
+        veri_Xn = initial_store["veri_Xn"]
+        test_y = initial_store["test_y"]
 
-    # scalerX = MinMaxScaler()
-    # scalerX = RobustScaler()
-    scalerX.fit(train_x)
-    train_Xn = scalerX.transform(train_x)  # Scaling the train data
-    test_Xn = scalerX.transform(test_x)  # Scaling the test data
-    # verification data
-    veri_x = df_veri_store.drop(
-        ["date", "Biogas_prod"], axis=1
-    )  # Take All the columns except 'Biogas_prod'
-    veri_y = df_veri_store["Biogas_prod"]
-    veri_Xn = scalerX.transform(veri_x)  # Scaling the verifying data
-    # train_b = scalerX.inverse_transform(train_Xn)
-    dict_values = {
-        # df
-        "train_x": train_x,
-        "test_x": test_x,
-        "X_test": X_test,
-        # numpy
-        "train_Xn": train_Xn,
-        "test_Xn": test_Xn,
-        # series
-        "train_y": train_y,
-        "test_y": test_y,
-        # verification
-        "veri_x": veri_x,
-        "veri_y": veri_y,
-        "veri_Xn": veri_Xn,
-    }
+        initial_store["train_Xn"] = np.vstack([train_Xn, veri_Xn[(dropdown_value - 1)]])
 
-    return dict_values
-    # else:
-    #     scalerX.fit(initial_store["train_x"])
-    #     train_Xn = scalerX.transform(initial_store["train_x"])  # Scaling the train data
-    #     new_train_Xn = np.concatenate((train_Xn, initial_store["veri_Xn"]), axis=0)
-    #     initial_store["train_Xn"] = new_train_Xn
-    #     return initial_store
+        initial_store["train_y"] = pd.concat(
+            [train_y, pd.Series(veri_y[dropdown_value - 1])]
+        )
+
+        return initial_store
 
 
 """ANOMALY DETECTION"""
@@ -227,7 +239,7 @@ def anomaly_detect(x_y_store, dropdown_value, df_veri_store):
         a_scores_veri = -1 * isolation_forest.score_samples(
             pd.DataFrame(X_veri.iloc[(dropdown_value - 1)]).T
         )
-        print(a_scores_veri[0])
+        # print(a_scores_veri[0])
 
         if a_scores_veri[0] >= 0.60:
             anomaly_df["general"] = True
@@ -254,7 +266,7 @@ def anomaly_detect(x_y_store, dropdown_value, df_veri_store):
 
         for i in anomaly_where:
             anomaly_df[i] = True
-        print(anomaly_df)
+        # print(anomaly_df)
         return anomaly_df
         """DETECTION SINGLE"""
         # compare_train = pd.concat([pd.Series(X_train.quantile(0.025)), pd.Series(X_train.iloc[479, ])], axis=1)
