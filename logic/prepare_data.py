@@ -242,7 +242,6 @@ def anomaly_detect(x_y_store, dropdown_value, df_veri_store, initial_store):
         else:
             anomaly_df["general"] = False
         """ 개별 Column 에 대한 anomaly"""
-        print("X_train", X_train)
         compare_train = pd.concat(
             [
                 pd.Series(X_train.quantile(0.025)),
@@ -252,15 +251,13 @@ def anomaly_detect(x_y_store, dropdown_value, df_veri_store, initial_store):
             axis=1,
         )
 
-        print("compare_train", compare_train)
-        print("compare_train cols", compare_train.columns)
-        print(compare_train.index)
         anomaly_where = np.where(
             (compare_train[0.025] > compare_train[dropdown_value - 1])
             | (compare_train[dropdown_value - 1] > compare_train[0.975])
         )[0]
         for i in anomaly_where:
             anomaly_df[i] = True
+
         # print(anomaly_df)
         return anomaly_df
         """DETECTION SINGLE"""

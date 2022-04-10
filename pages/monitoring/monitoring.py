@@ -4,7 +4,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 
-from utils.constants import monitored_tags, theme, blank_figure
+from utils.constants import monitored_tags, theme, blank_figure, all_tags
 import plotly.express as px
 
 
@@ -133,12 +133,14 @@ dropdowns = dbc.Row(
         dbc.Col(
             dcc.Dropdown(
                 id={"type": "tagDropdown", "index": idx},
-                options=[{"label": c, "value": c} for c in monitored_tags],
+                options=[{"label": c, "value": c} for c in all_tags],
                 placeholder="Select Tag",
                 value=monitored_tags[idx],
                 clearable=False,
                 # persistence=True, #이것 때문에
-                style={"backgroundColor": "rgb(48, 48, 48)", "display": "none"},
+                style={
+                    "backgroundColor": "rgb(48, 48, 48)",
+                },
             ),
             width=2,
         )

@@ -39,8 +39,8 @@ def make_quantile_annotation(name, y_pos):
 
 @application.callback(
     Output({"type": "monitoring-graph", "index": MATCH}, "figure"),
-    Input("quantile_store", "data"),
-    State({"type": "tagDropdown", "index": MATCH}, "value"),
+    Input({"type": "tagDropdown", "index": MATCH}, "value"),
+    State("quantile_store", "data"),
     State("df_store", "data"),
     State("avg_store", "data"),
 )
@@ -49,8 +49,8 @@ def make_quantile_annotation(name, y_pos):
 
 
 def changeTag(
-    quantile_store,
     tag,
+    quantile_store,
     df,
     avg_store,
 ):
@@ -62,9 +62,9 @@ def changeTag(
         tag = df.columns[3]
     # fig = px.scatter(df, x="date", y=tag, title=None, template="plotly_dark")
     try:
-        fig = px.line(df, x="date", y=tag, title=None, markers=True)
+        fig = px.line(df, x="date", y=tag, markers=True)
     except Exception:
-        fig = px.line(df, x="date", y=tag, title=None, markers=True)
+        fig = px.line(df, x="date", y=tag, markers=True)
     finally:
         fig.update_traces(
             mode="markers+lines",
@@ -82,17 +82,17 @@ def changeTag(
             yaxis_title=None,
             xaxis_title="Date",
             # updatemenus와 곂치기 때문에 none
-            # title={
-            #     "text": tag,
-            #     "xref": "paper",
-            #     "yref": "paper",
-            #     "x": 0.5,
-            #     # "pad": {"b": 50},
-            #     "xanchor": "center",
-            #     "yanchor": "middle",
-            #     "font": {"size": 15}
-            #     # "y": 0.5,
-            # },
+            title={
+                "text": tag,
+                "xref": "paper",
+                "yref": "paper",
+                "x": 0.5,
+                # "pad": {"b": 50},
+                "xanchor": "center",
+                "yanchor": "middle",
+                "font": {"size": 15}
+                # "y": 0.5,
+            },
             margin=dict(l=35, r=35, t=30, b=30, pad=20),
             # pad=dict(l=100, r=100, t=30, b=100),
         )
@@ -130,80 +130,81 @@ def changeTag(
             borderwidth=1,
         )
         cols = list(df.columns)
-        fig.update_layout(
-            updatemenus=[
-                dict(
-                    buttons=list(
-                        [
-                            dict(
-                                args=[
-                                    {"y": [df[col]]},
-                                    {
-                                        # updatemenus와 곂치기 때문에 none
-                                        # "title": {
-                                        #     "text": col,
-                                        #     "font": {"size": 15},
-                                        #     "xref": "paper",
-                                        #     "x": 0.5,
-                                        #     "xanchor": "center",
-                                        #     "yanchor": "middle",
-                                        # },
-                                        "yaxis": {
-                                            "range": [
-                                                min(df[col]) - 0.2 * min(df[col]),
-                                                max(df[col]) + 1.2 * min(df[col]),
-                                            ]
-                                        },
-                                        "annotations": [
-                                            make_avg_annotation(avg_store[col]),
-                                            make_quantile_annotation(
-                                                "Q1", quantile_store[col]["Q1"]
-                                            ),
-                                            make_quantile_annotation(
-                                                "Q3", quantile_store[col]["Q3"]
-                                            ),
-                                        ],
-                                        "shapes": [
-                                            {
-                                                "type": "dot",
-                                                "x0": 0,
-                                                "y0": quantile_store[col][i],
-                                                "x1": 1,
-                                                "y1": quantile_store[col][i],
-                                                "xref": "paper",
-                                                "yref": "y",
-                                                "line": {
-                                                    "color": "white",
-                                                    "width": 1,
-                                                    # "dash": "dot",
-                                                },
-                                                "opacity": 0.5,
-                                            }
-                                            for i in ["Q1", "Q3"]
-                                        ],
-                                    },
-                                ],
-                                label=col,
-                                method="update",
-                            )
-                            for col in [cols.pop(cols.index(tag))] + cols
-                            if col != "date"
-                        ]
-                    ),
-                    direction="down",
-                    pad={"r": 10, "t": 10},
-                    showactive=True,
-                    font=dict(size=15),
-                    x=0.55,
-                    y=1.7,  # 내릴수록 내려감
-                    xanchor="center",
-                    yanchor="top",
-                    bordercolor="white",
-                    # bgcolor="#333",
-                    bgcolor="rgb(24,20,20)",
-                ),
-            ]
-        )
+        # UPDATEMENUS
+        # fig.update_layout(
+        #     updatemenus=[
+        #         dict(
+        #             buttons=list(
+        #                 [
+        #                     dict(
+        #                         args=[
+        #                             {"y": [df[col]]},
+        #                             {
+        #                                 # updatemenus와 곂치기 때문에 none
+        #                                 # "title": {
+        #                                 #     "text": col,
+        #                                 #     "font": {"size": 15},
+        #                                 #     "xref": "paper",
+        #                                 #     "x": 0.5,
+        #                                 #     "xanchor": "center",
+        #                                 #     "yanchor": "middle",
+        #                                 # },
+        #                                 "yaxis": {
+        #                                     "range": [
+        #                                         min(df[col]) - 0.2 * min(df[col]),
+        #                                         max(df[col]) + 1.2 * min(df[col]),
+        #                                     ]
+        #                                 },
+        #                                 "annotations": [
+        #                                     make_avg_annotation(avg_store[col]),
+        #                                     make_quantile_annotation(
+        #                                         "Q1", quantile_store[col]["Q1"]
+        #                                     ),
+        #                                     make_quantile_annotation(
+        #                                         "Q3", quantile_store[col]["Q3"]
+        #                                     ),
+        #                                 ],
+        #                                 "shapes": [
+        #                                     {
+        #                                         "type": "dot",
+        #                                         "x0": 0,
+        #                                         "y0": quantile_store[col][i],
+        #                                         "x1": 1,
+        #                                         "y1": quantile_store[col][i],
+        #                                         "xref": "paper",
+        #                                         "yref": "y",
+        #                                         "line": {
+        #                                             "color": "white",
+        #                                             "width": 1,
+        #                                             # "dash": "dot",
+        #                                         },
+        #                                         "opacity": 0.5,
+        #                                     }
+        #                                     for i in ["Q1", "Q3"]
+        #                                 ],
+        #                             },
+        #                         ],
+        #                         label=col,
+        #                         method="update",
+        #                     )
+        #                     for col in [cols.pop(cols.index(tag))] + cols
+        #                     if col != "date"
+        #                 ]
+        #             ),
+        #             direction="down",
+        #             pad={"r": 10, "t": 10},
+        #             showactive=True,
+        #             font=dict(size=15),
+        #             x=0.55,
+        #             y=1.7,  # 내릴수록 내려감
+        #             xanchor="center",
+        #             yanchor="top",
+        #             bordercolor="white",
+        #             # bgcolor="#333",
+        #             bgcolor="rgb(24,20,20)",
+        #         ),
+        #     ]
+        # )
 
         " " " 이상 구역 Rect 표시 " " "
 
@@ -222,13 +223,16 @@ def changeTag(
         return fig
 
 
+"""ANOMALY"""
+
+
 @application.callback(
     Output({"type": "indicator", "index": MATCH}, "color"),
     Input({"type": "tagDropdown", "index": MATCH}, "value"),
     Input("anomaly_store", "data"),
 )
 def updateAnomaly(tag, anomaly_store):
-
+    print(tag, anomaly_store[tag])
     if anomaly_store[tag] == False:
         return "rgba(0, 234, 100, 1.0)"
     else:
