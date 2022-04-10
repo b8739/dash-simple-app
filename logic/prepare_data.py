@@ -98,6 +98,7 @@ def extract_veri(n_clicks):
         1022:1029:,
     ].copy()  # Data for Verifying (TTA Test)
     df_veri.reset_index(drop=True, inplace=True)
+    print(df_veri)
     return df_veri
 
 
@@ -208,22 +209,16 @@ def initial_data(
     Input("x_y_store", "data"),
     State("veri_dropdown", "value"),
     State("df_veri_store", "data"),
+    State("initial_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def anomaly_detect(x_y_store, dropdown_value, df_veri_store):
+def anomaly_detect(x_y_store, dropdown_value, df_veri_store, initial_store):
     anomaly_df = pd.Series(index=x_y_store["X"].columns, data=False)
     anomaly_df["general"] = False
     if not dropdown_value:
         return anomaly_df
     else:
-        """TRAIN TEST SPLIT"""
-        X_train_0, X_test_0, train_y, test_y = train_test_split(
-            x_y_store["X"], x_y_store["y"], test_size=0.2, random_state=123
-        )
-
-        X_train_0 = X_train_0.reset_index(drop=True)
-        X_train = X_train_0.drop(columns=["date"])
-
+        X_train = initial_store["train_x"].reset_index(drop=True)
         """ISOLATION_FOREST"""
         isolation_forest = IsolationForest(
             n_estimators=500, max_samples=256, random_state=1
@@ -247,23 +242,23 @@ def anomaly_detect(x_y_store, dropdown_value, df_veri_store):
         else:
             anomaly_df["general"] = False
         """ 개별 Column 에 대한 anomaly"""
+        print("X_train", X_train)
         compare_train = pd.concat(
             [
                 pd.Series(X_train.quantile(0.025)),
-                X_train.quantile(0.975),
-                pd.Series(
-                    X_train.iloc[
-                        479,
-                    ]
-                ),
+                pd.Series(X_train.quantile(0.975)),
+                pd.Series(X_veri.iloc[(dropdown_value - 1)]),
             ],
             axis=1,
         )
-        anomaly_where = np.where(
-            (compare_train[0.025] > compare_train[479.000])
-            | (compare_train[479.000] > compare_train[0.975])
-        )[0]
 
+        print("compare_train", compare_train)
+        print("compare_train cols", compare_train.columns)
+        print(compare_train.index)
+        anomaly_where = np.where(
+            (compare_train[0.025] > compare_train[dropdown_value - 1])
+            | (compare_train[dropdown_value - 1] > compare_train[0.975])
+        )[0]
         for i in anomaly_where:
             anomaly_df[i] = True
         # print(anomaly_df)
