@@ -8,14 +8,6 @@ from utils.constants import monitored_tags, theme, blank_figure, all_tags
 import plotly.express as px
 
 
-def isNormal(idx):
-    if idx == 1:
-
-        return {"state": "Abnormal", "color": "red"}
-    else:
-        return {"state": "Normal", "color": theme["primary"]}
-
-
 def plotMonitoringGraphs(graph_type, graph_number):
     children = [
         dcc.Graph(
@@ -41,8 +33,8 @@ def plotMonitoringGraphs(graph_type, graph_number):
                             "display": "inline-block",
                             "position": "absolute",
                             "zIndex": 1,
-                            "top": 30,
-                            "left": 40,
+                            "top": 15,
+                            "left": 45,
                         },
                     ),
                     # html.Br(),
@@ -180,11 +172,11 @@ contents = dbc.Col(
                     dbc.Col(
                         children=[
                             html.H6(
-                                "이상 감지 상태:",
+                                "현재 상태:",
                                 style={
                                     "display": "inline",
                                     "marginRight": 15,
-                                    "font-size": "1.6rem",
+                                    "font-size": "1.7rem",
                                     "font-weight": "100",
                                 },
                             ),
@@ -196,6 +188,7 @@ contents = dbc.Col(
                                     "marginRight": 10,
                                     "textAlign": "center",
                                     "color": "white",
+                                    "font-size": "1.7rem",
                                 },
                             ),
                             daq.Indicator(
@@ -215,6 +208,7 @@ contents = dbc.Col(
                                     "marginRight": 10,
                                     "textAlign": "center",
                                     "color": "grey",
+                                    "font-size": "1.7rem",
                                 },
                             ),
                             daq.Indicator(

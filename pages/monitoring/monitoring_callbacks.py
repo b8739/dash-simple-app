@@ -40,7 +40,7 @@ def make_quantile_annotation(name, y_pos):
 @application.callback(
     Output({"type": "monitoring-graph", "index": MATCH}, "figure"),
     Input({"type": "tagDropdown", "index": MATCH}, "value"),
-    State("quantile_store", "data"),
+    Input("quantile_store", "data"),
     State("df_store", "data"),
     State("avg_store", "data"),
 )
@@ -90,10 +90,10 @@ def changeTag(
                 # "pad": {"b": 50},
                 "xanchor": "center",
                 "yanchor": "middle",
-                "font": {"size": 15}
+                "font": {"size": 15},
                 # "y": 0.5,
             },
-            margin=dict(l=35, r=35, t=30, b=30, pad=20),
+            margin=dict(l=35, r=35, t=40, b=30, pad=20),
             # pad=dict(l=100, r=100, t=30, b=100),
         )
         " " " Quantile 표시 " " "

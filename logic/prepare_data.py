@@ -278,6 +278,7 @@ def normal_span(anomaly_store):
     default_style = {
         "marginRight": 10,
         "textAlign": "center",
+        "font-size": "1.7rem",
     }
 
     if anomaly_store["general"] == False:
@@ -317,6 +318,7 @@ def abnormal_span(anomaly_store):
         "marginLeft": 20,
         "marginRight": 10,
         "textAlign": "center",
+        "font-size": "1.7rem",
     }
     if anomaly_store["general"] == False:
         default_style.update({"color": "grey"})
@@ -337,7 +339,7 @@ def abnormal_span(anomaly_store):
 @cache.memoize(timeout=TIMEOUT)
 def abnormal_indicator(anomaly_store):
     if anomaly_store["general"] == False:
-        return "rgba(255, 0, 0, 0.1)"
+        return "rgba(255, 0, 0, 0.2)"
     else:
         return "rgba(255, 0, 0)"
 

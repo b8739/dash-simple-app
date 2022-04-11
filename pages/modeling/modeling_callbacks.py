@@ -84,7 +84,7 @@ def create_model(initial_store, data_idx, model):
 
 
 @application.callback(
-    Output("predict_value", "value"),
+    Output("predict_store", "data"),
     Input("model_store", "data"),
     State("df_veri_store", "data"),
     State("initial_store", "data"),
@@ -92,10 +92,9 @@ def create_model(initial_store, data_idx, model):
     # prevent_initial_call=True,
 )
 @cache.memoize(timeout=TIMEOUT)
-def update_predict_value(model, df_veri, initial_store, data_idx):
+def update_predict_store(model, df_veri, initial_store, data_idx):
     if data_idx == 0 or not data_idx:
         return model["xgb"].predict(initial_store["test_Xn"])
-        # return 29487
     veri_idx = int(data_idx) - 1
 
     xgb_veri_predict = model["xgb"].predict(
@@ -109,8 +108,22 @@ def update_predict_value(model, df_veri, initial_store, data_idx):
     # print("RF_Pred = ", rf_veri_predict)
     # print("SVR_Pred = ", svr_veri_predict)
     # print("Actual = ", initial_store["veri_y"][veri_idx])
-
+    print(xgb_veri_predict)
     return xgb_veri_predict
+
+
+@application.callback(
+    Output("predict_value", "value"),
+    Input("predict_store", "data"),
+    State("veri_dropdown", "value"),
+    # prevent_initial_call=True,
+)
+@cache.memoize(timeout=TIMEOUT)
+def update_predict_value(predict_store, data_idx):
+    if data_idx == 0 or not data_idx:
+        return 29487
+    else:
+        return predict_store
 
 
 """ GET MODELING RESULT"""
@@ -143,14 +156,13 @@ def update_predict_value(model, df_veri, initial_store, data_idx):
 
 @application.callback(
     Output("modeling_assessment_store", "data"),
-    Input("predict_value", "value"),
+    Input("predict_store", "data"),
     State("model_store", "data"),
     State("initial_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def get_evaluation(predict_value, model, initial_store):
-    # print(len(predict_value))
-    # print(len(initial_store["test_y"]))
+def get_evaluation(predict_store, model, initial_store):
+    # print(len(predict_store)dataprint(len(initial_store["test_y"]))
     xgb_model_predict = model["xgb"].predict(initial_store["test_Xn"])
     evaluation = algorithm.evaluate_model(
         "xgb", xgb_model_predict, initial_store["test_y"]
@@ -166,6 +178,7 @@ def create_callback(output):
     def get_modeling_assessment(modeling_assessment_store):
         if output == "MAPE_Value":
             value = modeling_assessment_store["MAPE_Value"]
+            value = round(value, 2)
         elif output == "R_square_XGB":
             value = modeling_assessment_store["R_square_XGB"]
         elif output == "RMSE":
@@ -188,7 +201,7 @@ for i in ["MAPE_Value", "RMSE"]:
 
 @application.callback(
     ServersideOutput("actual_predict_store", "data"),
-    Input("predict_value", "value"),
+    Input("predict_store", "data"),
     State("initial_store", "data"),
     State("actual_predict_store", "data"),
     State("veri_dropdown", "value"),
@@ -196,14 +209,14 @@ for i in ["MAPE_Value", "RMSE"]:
 )
 @cache.memoize(timeout=TIMEOUT)
 def save_actual_predictive_df(
-    predict_value, initial_store, actual_predict_store, dropdown, df_veri_store
+    predict_store, initial_store, actual_predict_store, dropdown, df_veri_store
 ):
     if not dropdown or dropdown == 0:
         """Actual Predictive"""
         result_df = algorithm.get_actual_predictive(
             initial_store["X_test"],
             initial_store["test_y"],
-            predict_value,
+            predict_store,
         )
         # print(predict_value)
         # result_df_dict = result_df.to_dict("records")
@@ -216,11 +229,11 @@ def save_actual_predictive_df(
         actual_predict_store.loc[len(actual_predict_store)] = [
             new_date,
             new_actual,
-            predict_value[0],
+            predict_store[0],
         ]
         # print('new_date', new_date)
         # print('new_actual', new_actual)
-        # print('predict_value', predict_value)
+        # print('predict_store', predict_store)
         return actual_predict_store
 
 
@@ -274,7 +287,7 @@ def draw_actual_predict_graph(df):
         paper_bgcolor="#32383e",
         plot_bgcolor="#32383e",
     )
-    fig.update_xaxes(showgrid=True, gridcolor="#696969")
+    fig.update_xaxes(title="Date", showgrid=True, gridcolor="#696969")
     fig.update_yaxes(showgrid=True, gridcolor="#696969")
     # fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor="#18191A")
     return fig
