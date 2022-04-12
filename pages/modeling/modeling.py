@@ -58,21 +58,16 @@ layout = html.Div(
                                     dbc.CardBody(
                                         [
                                             html.H6("모델 예측값", className="card-title"),
-                                            dcc.Loading(
-                                                children=[
-                                                    dcc.Store(
-                                                        id="predict_store",
-                                                        storage_type="session",
-                                                    ),
-                                                    daq.LEDDisplay(
-                                                        id="predict_value",
-                                                        label="Predict Value",
-                                                        labelPosition="bottom",
-                                                        color="#fcdc64",
-                                                        size=32,
-                                                    ),
-                                                ],
-                                                type="circle",
+                                            dcc.Store(
+                                                id="predict_store",
+                                                storage_type="session",
+                                            ),
+                                            daq.LEDDisplay(
+                                                id="predict_value",
+                                                label="Predict Value",
+                                                labelPosition="bottom",
+                                                color="#fcdc64",
+                                                size=32,
                                             ),
                                         ]
                                     ),
@@ -82,30 +77,25 @@ layout = html.Div(
                                     dbc.CardBody(
                                         [
                                             html.H6("모델 성능", className="card-title"),
-                                            dcc.Loading(
-                                                children=[
-                                                    dbc.Row(
-                                                        [
-                                                            dbc.Col(
-                                                                daq.LEDDisplay(
-                                                                    id=i,
-                                                                    label=i,
-                                                                    labelPosition="bottom",
-                                                                    value=0,
-                                                                    color="#fcdc64",
-                                                                    size=18,
-                                                                ),
-                                                                # width=3,
-                                                            )
-                                                            for i in [
-                                                                "MAPE_Value",
-                                                                # "R_square_XGB",
-                                                                "RMSE",
-                                                            ]
-                                                        ]
-                                                    ),
-                                                ],
-                                                type="circle",
+                                            dbc.Row(
+                                                [
+                                                    dbc.Col(
+                                                        daq.LEDDisplay(
+                                                            id=i,
+                                                            label=i,
+                                                            labelPosition="bottom",
+                                                            value=0,
+                                                            color="#fcdc64",
+                                                            size=18,
+                                                        ),
+                                                        # width=3,
+                                                    )
+                                                    for i in [
+                                                        "MAPE_Value",
+                                                        # "R_square_XGB",
+                                                        "RMSE",
+                                                    ]
+                                                ]
                                             ),
                                         ]
                                     ),

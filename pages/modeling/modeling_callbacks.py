@@ -175,6 +175,7 @@ def get_evaluation(predict_store, model, initial_store):
 
 
 def create_callback(output):
+    # @cache.memoize(timeout=TIMEOUT)
     def get_modeling_assessment(modeling_assessment_store):
         if output == "MAPE_Value":
             value = modeling_assessment_store["MAPE_Value"]

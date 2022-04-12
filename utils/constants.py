@@ -1,4 +1,5 @@
 import plotly.graph_objs as go
+import math
 
 monitored_tags = ["PS_incoming", "FW_Feed_A", "Dig_A_Temp", "Dig_Feed_A"]
 all_tags = [
@@ -55,4 +56,4 @@ monitoring_location = "/monitoring"
 modeling_location = "/modeling"
 analysis_location = "/analysis"
 
-TIMEOUT = 300
+TIMEOUT = 86400  # a day

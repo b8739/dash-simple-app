@@ -236,3 +236,13 @@ def updateAnomaly(tag, anomaly_store):
         return "rgba(0, 234, 100, 1.0)"
     else:
         return "rgba(255, 0, 0)"
+
+
+# @application.callback(
+#     Output({"type": "indicator", "index": MATCH}, "color"),
+#     Input({"type": "monitoring-graph", "index": MATCH}, "style"),
+#     State({"type": "tagDropdown", "index": MATCH}, "value"),
+#     State("anomaly_store", "data"),
+# )
+# def updateAnomaly(graph, tagDropdown, anomaly_store):
+#     print(graph)

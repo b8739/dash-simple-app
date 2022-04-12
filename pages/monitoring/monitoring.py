@@ -176,7 +176,7 @@ contents = dbc.Col(
                                 style={
                                     "display": "inline",
                                     "marginRight": 15,
-                                    "font-size": "1.7rem",
+                                    "font-size": "1.8rem",
                                     "font-weight": "100",
                                 },
                             ),
