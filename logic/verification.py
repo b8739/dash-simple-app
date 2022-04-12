@@ -46,8 +46,7 @@ def verifyModel(
     )  # Apply veri data to svr model
 
     # Results
-    print("XGB_Pred = ", xgb_veri_predict)
-    print("RF_Pred = ", rf_veri_predict)
-    print("SVR_Pred = ", svr_veri_predict)
-
-    print("Actual = ", veri_y[j])
+    # print("XGB_Pred = ", xgb_veri_predict)
+    # print("RF_Pred = ", rf_veri_predict)
+    # print("SVR_Pred = ", svr_veri_predict)
+    # print("Actual = ", veri_y[j])

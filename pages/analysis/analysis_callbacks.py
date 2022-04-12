@@ -50,7 +50,6 @@ def get_shap_importance(initial_store):
     shap_importance = pd.DataFrame(
         list(zip(feature_names, vals)), columns=["col_name", "feature_importance_vals"]
     )
-    print()
 
     shap_importance.sort_values(
         by=["feature_importance_vals"], ascending=False, inplace=True

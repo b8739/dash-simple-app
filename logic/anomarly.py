@@ -23,6 +23,6 @@ def anomaly_detect(df_veri, X_train):
 
     a_scores_veri = -1 * isolation_forest.score_samples(X_veri)
 
-    print("verification 이상감지")
-    print(np.where(a_scores_veri >= 0.60))
-    print(a_scores_veri[np.where(a_scores_veri >= 0.60)])
+    # print("verification 이상감지")
+    # print(np.where(a_scores_veri >= 0.60))
+    # print(a_scores_veri[np.where(a_scores_veri >= 0.60)])

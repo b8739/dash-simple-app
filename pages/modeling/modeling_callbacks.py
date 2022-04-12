@@ -33,6 +33,7 @@ from dash.exceptions import PreventUpdate
     Input("initial_store", "data"),
     State("veri_dropdown", "value"),
     State("model_store", "data"),
+    # memoize=True,
 )
 @cache.memoize(timeout=TIMEOUT)
 def create_model(initial_store, data_idx, model):
@@ -108,7 +109,6 @@ def update_predict_store(model, df_veri, initial_store, data_idx):
     # print("RF_Pred = ", rf_veri_predict)
     # print("SVR_Pred = ", svr_veri_predict)
     # print("Actual = ", initial_store["veri_y"][veri_idx])
-    print(xgb_veri_predict)
     return xgb_veri_predict
 
 

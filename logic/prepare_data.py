@@ -58,7 +58,6 @@ def preprocess(df):
 @cache.memoize(timeout=TIMEOUT)
 def extract_train_test(dropdown_value, df_store, df_veri_store):
     # Read Rows upto Index of Verification Data
-    print("dropdown_value", dropdown_value)
     if dropdown_value == 0 or not dropdown_value:
 
         # Read Dataframe
@@ -98,7 +97,7 @@ def extract_veri(n_clicks):
         1022:1029:,
     ].copy()  # Data for Verifying (TTA Test)
     df_veri.reset_index(drop=True, inplace=True)
-    print(df_veri)
+    # print(df_veri)
     return df_veri
 
 

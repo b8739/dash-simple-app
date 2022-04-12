@@ -32,26 +32,12 @@ datastore = html.Div(
                 id="quantile_store",
                 storage_type="session",
             ),
-            dcc.Store(
-                id="model_store",
-                storage_type="session",
-            ),
-            dcc.Store(
-                id="modeling_result_store",
-                storage_type="session",
-            ),
-            dcc.Store(
-                id="modeling_assessment_store",
-                storage_type="session",
-            ),
+
             dcc.Store(
                 id="anomaly_store",
                 storage_type="session",
             ),
-            dcc.Store(
-                id="predict_store",
-                storage_type="session",
-            ),
+
         ],
         # fullscreen=True,
         type="circle",

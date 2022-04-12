@@ -134,11 +134,23 @@ layout = html.Div(
         dcc.Loading(
             [
                 dcc.Store(
-                    id="actual_predict_store",
+                    id="model_store",
                     storage_type="session",
                 ),
                 dcc.Store(
                     id="modeling_result_store",
+                    storage_type="session",
+                ),
+                dcc.Store(
+                    id="modeling_assessment_store",
+                    storage_type="session",
+                ),
+                dcc.Store(
+                    id="predict_store",
+                    storage_type="session",
+                ),
+                dcc.Store(
+                    id="actual_predict_store",
                     storage_type="session",
                 ),
                 dcc.Store(
