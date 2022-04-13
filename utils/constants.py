@@ -55,5 +55,6 @@ iris_page_location = "/iris"
 monitoring_location = "/monitoring"
 modeling_location = "/modeling"
 analysis_location = "/analysis"
+platform_location = "/platform"
 
 TIMEOUT = 86400  # a day
