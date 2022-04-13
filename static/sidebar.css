@@ -87,9 +87,9 @@
 
   /* set margins of the main content so that it doesn't overlap the sidebar */
   #page-content {
-    margin-top: 4rem;
-    margin-left: 22rem;
-    margin-right: 2rem;
+    margin-top: 1rem;
+    margin-left: 10rem;
+    margin-right: 10rem;
     transition: margin-left 0.3s ease-in-out;
   }
 }
