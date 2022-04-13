@@ -1,14 +1,7 @@
 import dash_bootstrap_components as dbc
 import dash_html_components as html
 
-from utils.constants import (
-    home_page_location,
-    gdp_page_location,
-    iris_page_location,
-    monitoring_location,
-    modeling_location,
-    analysis_location,
-)
+
 from dash import dcc, html
 
 
@@ -54,40 +47,6 @@ sidebar_header = dbc.Row(
 sidebar = html.Div(
     [
         sidebar_header,
-        # we wrap the horizontal rule and short blurb in a div that can be
-        # hidden on a small screen
-        # html.Div(
-        #     [
-        #         html.Hr(),
-        #         html.P(
-        #             "기능 구성",
-        #             style={"color": "#fff"},
-        #             className="lead",
-        #         ),
-        #     ],
-        #     id="blurb",
-        # ),
-        # # use the Collapse component to animate hiding / revealing links
-        # dbc.Collapse(
-        #     dbc.Nav(
-        #         [
-        #             # dbc.NavLink("Home", href=home_page_location, active="exact"),
-        #             # dbc.NavLink("GDP", href=gdp_page_location, active="exact"),
-        #             dbc.NavLink(
-        #                 "모니터링 (Monitoring)", href=monitoring_location, active="exact"
-        #             ),
-        #             dbc.NavLink(
-        #                 "모델링 (Modeling)", href=modeling_location, active="exact"
-        #             ),
-        #             dbc.NavLink(
-        #                 "관계성 그래프 (Analysis)", href=analysis_location, active="exact"
-        #             ),
-        #         ],
-        #         vertical=True,
-        #         pills=True,
-        #     ),
-        #     id="collapse",
-        # ),
         html.Hr(),
         html.Div(
             [
