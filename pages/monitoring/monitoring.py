@@ -15,9 +15,10 @@ def plotMonitoringGraphs(graph_type, graph_number):
             id="biggas_graph",
             style={
                 "height": "30vh",
+                "margin-bottom": "1.5rem",
             },
             figure=blank_figure(),
-        )
+        ),
     ]
     for idx in range(graph_number):
         # children.append(indicator_content)
