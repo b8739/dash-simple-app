@@ -45,24 +45,43 @@ layout = dcc.Loading(
             ],
             style={"marginBottom": "2rem"},
         ),
-        dbc.Card(
-            dbc.CardBody(
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            daq.Gauge(
-                                id={"type": "gauge", "index": i},
-                                label="Default",
-                                value=6,
-                                size=120,
-                                style={"marginTop": "1rem"},
-                            ),
-                        )
-                        for i in range(4)
-                    ],
-                ),
-            ),
-            style={"marginTop": "1rem", "backgroundColor": "#0f2331"},
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody(
+                            [
+                                html.H6(
+                                    "Card title",
+                                    className="card-title",
+                                    # style={'marginLeft':'1rem'}
+                                ),
+                                dbc.Row(
+                                    [
+                                        dbc.Col(
+                                            daq.Gauge(
+                                                id={"type": "gauge", "index": i},
+                                                label="Default",
+                                                value=6,
+                                                size=120,
+                                                style={"marginTop": "1rem"},
+                                            ),
+                                            width=6,
+                                        )
+                                        for i in range(2)
+                                    ]
+                                ),
+                            ],
+                        ),
+                        style={
+                            "marginTop": "1rem",
+                            "backgroundColor": "#0f2331",
+                            "padding": "2rem",
+                        },
+                    )
+                )
+                for i in range(2)
+            ]
         ),
         # """DATA STORE"""
         html.Div(
