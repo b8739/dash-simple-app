@@ -61,8 +61,8 @@ def evaluate_model(algorithm, model_predict, test_y):
         # print("RMSE: ", RMSE)
         # print("MAPE: ", MAPE(test_y, model_predict))
         return {
-            "RMSE": RMSE,
             "R_square_XGB": R_square_XGB,
+            "RMSE": RMSE,
             "MAPE_Value": MAPE_Value,
         }
     elif algorithm == "svr":

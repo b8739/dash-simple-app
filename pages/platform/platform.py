@@ -14,10 +14,10 @@ layout = dcc.Loading(
         dbc.Row(
             dbc.Col(
                 dcc.Graph(
-                    id="bio_graph", figure=blank_figure(), style={"height": "35vh"}
+                    id="bio_graph", figure=blank_figure(), style={"height": "28vh"}
                 )
             ),
-            style={"marginBottom": "1rem"},
+            style={"marginBottom": "2rem"},
         ),
         dbc.Row(
             [
@@ -25,7 +25,7 @@ layout = dcc.Loading(
                     dcc.Graph(
                         id="proc_rate_a",
                         figure=blank_figure(),
-                        style={"height": "30vh"},
+                        style={"height": "25vh"},
                     ),
                     width=6,
                 ),
@@ -33,7 +33,7 @@ layout = dcc.Loading(
                     dcc.Graph(
                         id="proc_rate_b",
                         figure=blank_figure(),
-                        style={"height": "30vh"},
+                        style={"height": "25vh"},
                     ),
                     width=6,
                 ),
@@ -43,20 +43,26 @@ layout = dcc.Loading(
                     style={"display": "none"},
                 ),
             ],
-            style={"marginBottom": "1rem"},
+            style={"marginBottom": "2rem"},
         ),
-        dbc.Row(
-            [
-                dbc.Col(
-                    daq.Gauge(
-                        id={"type": "gauge", "index": i},
-                        label="Default",
-                        value=6,
-                        size=150,
-                    ),
-                )
-                for i in range(4)
-            ]
+        dbc.Card(
+            dbc.CardBody(
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            daq.Gauge(
+                                id={"type": "gauge", "index": i},
+                                label="Default",
+                                value=6,
+                                size=120,
+                                style={"marginTop": "1rem"},
+                            ),
+                        )
+                        for i in range(4)
+                    ],
+                ),
+            ),
+            style={"marginTop": "1rem", "backgroundColor": "#0f2331"},
         ),
         # """DATA STORE"""
         html.Div(

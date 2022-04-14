@@ -20,7 +20,7 @@ sys.path.append("./pages/platform")
 @cache.memoize(timeout=TIMEOUT)
 def save_first_data(n_clicks):
     print(sys.path)
-    df = pd.read_excel("pages/platform/ketep_biogas_data_20220411_02.xlsx")
+    df = pd.read_excel("pages/platform/ketep_biogas_data_20220411.xlsx")
 
     return df
 
@@ -45,6 +45,8 @@ def save_second_data(n_clicks):
 )
 @cache.memoize(timeout=TIMEOUT)
 def update_biggraph(first_df, second_df):
+    first_df = first_df.tail(100)
+    second_df = second_df.tail(100)
     trace_list = [
         go.Scatter(
             name="A",
@@ -53,8 +55,8 @@ def update_biggraph(first_df, second_df):
             visible=True,
             mode="lines+markers",
             line={"width": 1},
-            line_color="#FF8303",
-            marker=dict(size=2),
+            line_color="#70e3a5",
+            marker=dict(size=4),
         ),
         go.Scatter(
             name="B",
@@ -64,8 +66,8 @@ def update_biggraph(first_df, second_df):
             mode="lines+markers",
             # mode="markers",
             line={"width": 1},
-            line_color="#03ac13",
-            marker=dict(size=1),
+            line_color="#e3de70",
+            marker=dict(size=4),
         ),
     ]
     fig = go.Figure(data=trace_list)
@@ -80,7 +82,12 @@ def update_biggraph(first_df, second_df):
             "yanchor": "top",
             # "font": {"size": 10},
         },
+        margin=dict(l=70, r=70, t=70, b=80),
+        paper_bgcolor="#041929",
+        plot_bgcolor="#041929",
     )
+    fig.update_xaxes(title="Date", showgrid=True, gridcolor="#696969")
+    fig.update_yaxes(showgrid=True, gridcolor="#696969")
     return fig
 
 
@@ -90,68 +97,104 @@ def update_biggraph(first_df, second_df):
 @application.callback(
     Output("proc_rate_a", "figure"),
     Input("first_bio_store", "data"),
+    Input("second_bio_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def update_rate_graph(df):
-    fig = px.line(df, x="Date", y="Proc_rate_A", markers=True)
-    fig.update_traces(
-        mode="markers+lines",
-        marker=dict(size=1, line=dict(width=0.5, color="#f4d44d")),
-        line=dict(color="#f4d44d", width=0.5),
-    ),
+def update_rate_graph(first_df, second_df):
+    first_df = first_df.tail(100)
+    second_df = second_df.tail(100)
+    trace_list = [
+        go.Scatter(
+            name="A",
+            x=first_df["Date"],
+            y=first_df["Proc_rate_A"],
+            visible=True,
+            mode="lines+markers",
+            line={"width": 0.9},
+            line_color="#65f4e3",
+            marker=dict(size=3),
+        ),
+        go.Scatter(
+            name="B",
+            x=second_df["Date"],
+            y=second_df["Proc_rate_A"],
+            visible=True,
+            mode="lines+markers",
+            # mode="markers",
+            line={"width": 0.9},
+            line_color="#e88790",
+            marker=dict(size=3),
+        ),
+    ]
+    fig = go.Figure(data=trace_list)
     fig.update_layout(template="plotly_dark")
+
     fig.update_layout(
-        yaxis_title=None,
-        xaxis_title="Date",
-        # updatemenus와 곂치기 때문에 none
         title={
             "text": "Proc_rate_A",
-            "xref": "paper",
-            "yref": "paper",
+            "y": 0.9,
             "x": 0.5,
-            # "pad": {"b": 50},
             "xanchor": "center",
-            "yanchor": "middle",
-            "font": {"size": 15},
-            # "y": 0.5,
+            "yanchor": "top",
         },
-        margin=dict(l=35, r=35, t=50, b=50, pad=20),
-        # pad=dict(l=100, r=100, t=30, b=100),
+        margin=dict(l=70, r=70, t=60, b=60),
+        paper_bgcolor="#041929",
+        plot_bgcolor="#041929",
     )
+    fig.update_xaxes(title="Date", showgrid=True, gridcolor="#696969")
+    fig.update_yaxes(showgrid=True, gridcolor="#696969")
     return fig
 
 
 @application.callback(
     Output("proc_rate_b", "figure"),
+    Input("first_bio_store", "data"),
     Input("second_bio_store", "data"),
 )
 @cache.memoize(timeout=TIMEOUT)
-def update_rate_graph(df):
-    fig = px.line(df, x="Date", y="Proc_rate_B", markers=True)
-    fig.update_traces(
-        mode="markers+lines",
-        marker=dict(size=1, line=dict(width=0.5, color="#f4d44d")),
-        line=dict(color="#f4d44d", width=0.5),
-    ),
+def update_rate_graph(first_df, second_df):
+    first_df = first_df.tail(100)
+    second_df = second_df.tail(100)
+    trace_list = [
+        go.Scatter(
+            name="A",
+            x=first_df["Date"],
+            y=first_df["Proc_rate_B"],
+            visible=True,
+            mode="lines+markers",
+            line={"width": 0.9},
+            line_color="#65f4e3",
+            marker=dict(size=3),
+        ),
+        go.Scatter(
+            name="B",
+            x=second_df["Date"],
+            y=second_df["Proc_rate_B"],
+            visible=True,
+            mode="lines+markers",
+            # mode="markers",
+            line={"width": 0.9},
+            line_color="#e88790",
+            marker=dict(size=3),
+        ),
+    ]
+    fig = go.Figure(data=trace_list)
     fig.update_layout(template="plotly_dark")
+
     fig.update_layout(
-        yaxis_title=None,
-        xaxis_title="Date",
-        # updatemenus와 곂치기 때문에 none
         title={
             "text": "Proc_rate_B",
-            "xref": "paper",
-            "yref": "paper",
+            "y": 0.9,
             "x": 0.5,
-            # "pad": {"b": 50},
             "xanchor": "center",
-            "yanchor": "middle",
-            "font": {"size": 15},
-            # "y": 0.5,
+            "yanchor": "top",
         },
-        margin=dict(l=35, r=35, t=50, b=50, pad=20),
-        # pad=dict(l=100, r=100, t=30, b=100),
+        margin=dict(l=70, r=70, t=60, b=60),
+        paper_bgcolor="#041929",
+        plot_bgcolor="#041929",
     )
+    fig.update_xaxes(title="Date", showgrid=True, gridcolor="#696969")
+    fig.update_yaxes(showgrid=True, gridcolor="#696969")
     return fig
 
 
