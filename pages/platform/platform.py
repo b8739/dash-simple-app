@@ -63,11 +63,12 @@ layout = dcc.Loading(
                                                 # id={"type": "gauge", "index": i},
                                                 id="gauge" + str(i) + str(idx_j),
                                                 value=6,
-                                                size=150,
+                                                size=200,
                                                 showCurrentValue=True,
                                                 label=col + "  평균값 (최근 일주일)",
-                                                max=1,
+                                                units="%",
                                                 min=0,
+                                                max=100,
                                                 style={
                                                     "marginTop": "1rem",
                                                 },
@@ -88,7 +89,8 @@ layout = dcc.Loading(
                     )
                 )
                 for i in range(2)
-            ]
+            ],
+            className="gauge_container",
         ),
         # """DATA STORE"""
         html.Div(

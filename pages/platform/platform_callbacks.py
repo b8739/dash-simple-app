@@ -38,7 +38,7 @@ def save_second_data(n_clicks):
 def create_callback(column):
     def get_rate_mean(first_bio_store):
         print(first_bio_store.iloc[-7:][column].mean())
-        return first_bio_store.iloc[-7:][column].mean()
+        return first_bio_store.iloc[-7:][column].mean() * 100
 
     return get_rate_mean
 
@@ -56,7 +56,7 @@ for idx, column in enumerate(["Proc_rate_A", "Proc_rate_B"]):
 def create_callback(column):
     def get_rate_mean(first_bio_store):
         print(first_bio_store.iloc[-7:][column].mean())
-        return first_bio_store.iloc[-7:][column].mean()
+        return first_bio_store.iloc[-7:][column].mean() * 100
 
     return get_rate_mean
 
