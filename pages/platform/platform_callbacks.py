@@ -10,8 +10,6 @@ import sys
 
 sys.path.append("./pages/platform")
 
-""" GET DATAFRAME """
-
 
 @application.callback(
     ServersideOutput("first_bio_store", "data"),
@@ -19,7 +17,6 @@ sys.path.append("./pages/platform")
 )
 @cache.memoize(timeout=TIMEOUT)
 def save_first_data(n_clicks):
-    print(sys.path)
     df = pd.read_excel("pages/platform/ketep_biogas_data_20220411.xlsx")
 
     return df
@@ -34,6 +31,43 @@ def save_second_data(n_clicks):
     df = pd.read_excel("pages/platform/ketep_biogas_data_20220411_02.xlsx")
     return df
 
+
+"""GAUGE A"""
+
+
+def create_callback(column):
+    def get_rate_mean(first_bio_store):
+        print(first_bio_store.iloc[-7:][column].mean())
+        return first_bio_store.iloc[-7:][column].mean()
+
+    return get_rate_mean
+
+
+for idx, column in enumerate(["Proc_rate_A", "Proc_rate_B"]):
+    application.callback(
+        Output("gauge0" + str(idx), "value"),
+        Input("first_bio_store", "data"),
+    )(create_callback(column))
+
+
+"""GAUGE B"""
+
+
+def create_callback(column):
+    def get_rate_mean(first_bio_store):
+        print(first_bio_store.iloc[-7:][column].mean())
+        return first_bio_store.iloc[-7:][column].mean()
+
+    return get_rate_mean
+
+
+for idx, column in enumerate(["Proc_rate_A", "Proc_rate_B"]):
+    application.callback(
+        Output("gauge1" + str(idx), "value"),
+        Input("second_bio_store", "data"),
+    )(create_callback(column))
+
+""" GET DATAFRAME """
 
 """ DRAW GRAPH 1 """
 

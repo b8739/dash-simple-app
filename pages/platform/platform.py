@@ -51,32 +51,39 @@ layout = dcc.Loading(
                     dbc.Card(
                         dbc.CardBody(
                             [
-                                html.H6(
-                                    "Card title",
-                                    className="card-title",
-                                    # style={'marginLeft':'1rem'}
-                                ),
+                                # html.P(
+                                #     "Proc_rate 평균값 (Site: " + str(i) + ")",
+                                #     # className="card-title",
+                                #     style={"textAlign": "center", "fontSize": "1.7rem"},
+                                # ),
                                 dbc.Row(
                                     [
                                         dbc.Col(
                                             daq.Gauge(
-                                                id={"type": "gauge", "index": i},
-                                                label="Default",
+                                                # id={"type": "gauge", "index": i},
+                                                id="gauge" + str(i) + str(idx_j),
                                                 value=6,
-                                                size=120,
-                                                style={"marginTop": "1rem"},
+                                                size=150,
+                                                showCurrentValue=True,
+                                                label=col + "  평균값 (최근 일주일)",
+                                                max=1,
+                                                min=0,
+                                                style={
+                                                    "marginTop": "1rem",
+                                                },
                                             ),
                                             width=6,
                                         )
-                                        for i in range(2)
+                                        for idx_j, col in enumerate(
+                                            ["Proc_rate_A", "Proc_rate_B"]
+                                        )
                                     ]
                                 ),
                             ],
                         ),
                         style={
-                            "marginTop": "1rem",
+                            # "marginTop": "1rem",
                             "backgroundColor": "#0f2331",
-                            "padding": "2rem",
                         },
                     )
                 )
