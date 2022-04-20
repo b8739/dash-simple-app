@@ -145,7 +145,7 @@ def initial_data(
     if dropdown_value == 0 or not dropdown_value:
         ## SET 'TRAIN', 'TEST' DATA, TRAIN/TEST RATIO, & 'WAY OF RANDOM SAMPLING' ##
         X_train, X_test, train_y, test_y = train_test_split(
-            X, y, test_size=0.2, random_state=12345
+            X, y, test_size=0.2, random_state=456789
         )
 
         # X_train, X_test, train_y, test_y = train_test_split(X, y, test_size = 0.2, random_state = 56789)
